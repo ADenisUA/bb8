@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BB-8</title>
+
+    <script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
+
+    <script>
+        function connect() {
+            $.get( "/connect/?bb8Id="+ $("#bb8Id").val(), function( data ) {
+
+            });
+        }
+
+    </script>
+</head>
+<body>
+
+<form>
+    <label for="bb8Id">BB-8 Bluetooth ID</label>
+    <input type="text" id="bb8Id" value="56504b4b3f714fa198d1f9a5f0349dfe" />
+    <button type="button" onclick="connect()">Connect</button>
+    <button type="button">Start Calibration</button>
+    <button type="button">Complete Calibration</button>
+    <button type="button">Start Navigation</button>
+    <button type="button">Complete Navigation</button>
+</form>
+
+</body>
+</html>
