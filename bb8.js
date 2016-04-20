@@ -2,9 +2,9 @@
 
 var sphero = require("sphero");
 
-var bb8 = module.exports = function bb8(uuid) {
+var bb8 = module.exports = function bb8(id) {
 
-    var _uuid = uuid;
+    var _id = id;
     var _droid = null;
     var _navigator = null;
     var _decorator = null;
@@ -31,9 +31,13 @@ var bb8 = module.exports = function bb8(uuid) {
     var RSSI_A = 0.8;
     var MOVE_TIME = 3;//sec
 
+    this.getId = function() {
+        return _id;
+    }
+
     this.connect = function(callback) {
         if (!_droid) {
-            _droid = sphero(_uuid);
+            _droid = sphero(_id);
             _navigator = new Navigator(_droid);
             _decorator = new Decorator(_droid);
 
@@ -77,21 +81,22 @@ var bb8 = module.exports = function bb8(uuid) {
     }
 
     this.startCalibration = function() {
+        _decorator.blink({red: 255, green: 255, blue: 0});
         _startMonitorRssi(function(data) {
             Logger.log(data);
-            _decorator.blink();
         });
     }
 
     this.cancelCalibration = function() {
         _stopMonitorRssi();
+        _decorator.stopBlink();
         _decorator.fadeTo({red: 0, green: 0, blue: 0});
     }
 
     this.completeCalibration = function() {
         _stopMonitorRssi();
         _rssiLimit = _rssi;
-        _decorator.fadeTo({red: 0, green: 255, blue: 0});
+        _decorator.blink({red: 0, green: 255, blue: 0});
     }
 
     this.startNavigation = function() {
@@ -113,14 +118,8 @@ var bb8 = module.exports = function bb8(uuid) {
         _startMonitorRssi(function() {
             _updateColor();
 
-            //Logger.log("rawRssi=" + rssi + " rssi=" + _rssi);
-            //var dRssi = _getDrssi();
-            //if (dRssi < -RSSI_SENSITIVITY) {
-            //    Logger.log("wrong way! dRssi="+dRssi+" rssi="+rssi+" _lastRssi="+_lastRssi);
-            //    _chooseDirection();
-            //} else
             if (_rssi > _rssiLimit) {
-                _findDirectionToBase();
+                _gotoBase();
             }
         });
 
@@ -188,11 +187,20 @@ var bb8 = module.exports = function bb8(uuid) {
         }
     }
 
+    this.cancelNavigation = function() {
+        _decorator.fade({red: 0, green: 0, blue: 0});
+        Logger.log("Stopped!");
+    }
+
+    var _completeNavigation = function() {
+        _decorator.blink();
+        Logger.log("Arrived!");
+    }
+
     var _gotoBase = function() {
 
         if (_rssi >= _rssiLimit) {
-            _decorator.blink();
-            Logger.log("Arrived!");
+            _completeNavigation();
             return;
         }
 
@@ -282,14 +290,22 @@ var bb8 = module.exports = function bb8(uuid) {
 
     function Decorator(droid) {
         var _droid = droid;
-        var _interval = null;
+        var _fadeInterval = null;
+        var _blinkInterval = null;
         var _currentColor = { red: 0, green: 0, blue: 0 };
         var _this = this;
 
-        var _stopEffect = function() {
-            if (_interval) {
-                clearInterval(_interval);
-                _interval = null;
+        var _stopFade = function() {
+            if (_fadeInterval) {
+                clearInterval(_fadeInterval);
+                _fadeInterval = null;
+            }
+        }
+
+        this.stopBlink = function() {
+            if (_blinkInterval) {
+                clearInterval(_blinkInterval);
+                _blinkInterval = null;
             }
         }
 
@@ -316,7 +332,7 @@ var bb8 = module.exports = function bb8(uuid) {
             if (fade) {
                 _this.fadeTo(colorTo);
             } else {
-                _stopEffect();
+                _stopFade();
 
                 Logger.log("setColor", colorTo);
                 _currentColor = colorTo;
@@ -324,15 +340,14 @@ var bb8 = module.exports = function bb8(uuid) {
             }
         }
 
-        this.fadeTo = function(colorTo) {
-
-            _stopEffect();
+        this.fadeTo = function(colorTo, time) {
+            _stopFade();
 
             if (_isSameColor(_currentColor, colorTo)) {
                 return;
             }
 
-            var t = 1000;
+            var t = (time) ? time : 1000;
             var dT = 100;
             var steps = t/dT;
 
@@ -340,9 +355,9 @@ var bb8 = module.exports = function bb8(uuid) {
             var gStep = _calculateFadeStep(_currentColor.green, colorTo.green, steps);
             var bStep = _calculateFadeStep(_currentColor.blue, colorTo.blue, steps);
 
-            _interval = setInterval(function(){
+            _fadeInterval = setInterval(function(){
                 if (_isSameColor(_currentColor, colorTo)) {
-                    _stopEffect();
+                    _stopFade();
                 } else {
                     var _colorTo = {};
                     _colorTo.red = _incrementColor(rStep, _currentColor.red, colorTo.red);
@@ -355,30 +370,24 @@ var bb8 = module.exports = function bb8(uuid) {
             }, dT);
         }
 
-        this.blink = function() {
-            _stopEffect();
+        this.blink = function(color) {
+            _this.stopBlink();
 
-            var color = "red";
+            var fadeToBlack = false;
 
-            _interval = setInterval(function() {
-                switch(color) {
-                    case "red":
-                        color = "green";
-                        break;
-                    case "green":
-                        color = "blue";
-                        break;
-                    case "blue":
-                        color = "red";
-                        break;
+            _blinkInterval = setInterval(function() {
+                if (!fadeToBlack) {
+                    _this.fadeTo(color);
+                } else {
+                    _this.fadeTo({red: 0, green: 0, blue: 0});
                 }
-
-                _droid.color(color);
-            }, 150);
+                fadeToBlack = !fadeToBlack;
+            }, 1000);
         }
 
         this.glow = function() {
-            _stopEffect();
+            _stopFade();
+            _this.stopBlink();
 
             var r = 0;
             var g = 0;
@@ -386,7 +395,7 @@ var bb8 = module.exports = function bb8(uuid) {
             var value = 0;
             var d = 25;
 
-            _interval = setInterval(function() {
+            _fadeInterval = setInterval(function() {
                 if (b+d <= 255) {
                     b += d;
                 } else {
