@@ -10,7 +10,7 @@ var bb8 = module.exports = function bb8(id) {
     var _decorator = null;
     var _this = this;
 
-    var _rssiLimit = -50;
+    var _rssiLimit = -40;
     var _rssi = -100;
     var _lastRssi = -100;
     var _lastDirection = 0;
@@ -100,6 +100,8 @@ var bb8 = module.exports = function bb8(id) {
     }
 
     this.startNavigation = function() {
+        _cancelNavigation();
+
         _droid.detectCollisions();
         _droid.streamVelocity();
         _droid.stopOnDisconnect();
@@ -111,9 +113,8 @@ var bb8 = module.exports = function bb8(id) {
 
         _droid.on("collision", function(data) {
             Logger.log("collision", data);
-            _findDirectionToBase();
+            _gotoBase();
         });
-
 
         _startMonitorRssi(function() {
             _updateColor();
@@ -157,10 +158,14 @@ var bb8 = module.exports = function bb8(id) {
         return x - y;
     }
 
-    var _findDirectionToBase = function() {
+    var _cancelNavigation = function() {
         if (_chooseDirectionTimeout) {
             clearTimeout(_chooseDirectionTimeout);
         }
+    }
+
+    var _findDirectionToBase = function() {
+        _cancelNavigation();
 
         _chooseDirectionTimeout = setTimeout(function(){
             _gotoBase();
@@ -188,12 +193,13 @@ var bb8 = module.exports = function bb8(id) {
     }
 
     this.cancelNavigation = function() {
+        _cancelNavigation();
         _decorator.fade({red: 0, green: 0, blue: 0});
         Logger.log("Stopped!");
     }
 
     var _completeNavigation = function() {
-        _decorator.blink();
+        _decorator.blink({ red: 0, green: 0, blue: 255});
         Logger.log("Arrived!");
     }
 
@@ -295,6 +301,9 @@ var bb8 = module.exports = function bb8(id) {
         var _currentColor = { red: 0, green: 0, blue: 0 };
         var _this = this;
 
+        var FADE_INTERVAL = 250;
+        var BLINK_INTERVAL = 1000;
+
         var _stopFade = function() {
             if (_fadeInterval) {
                 clearInterval(_fadeInterval);
@@ -348,7 +357,7 @@ var bb8 = module.exports = function bb8(id) {
             }
 
             var t = (time) ? time : 1000;
-            var dT = 100;
+            var dT = FADE_INTERVAL;
             var steps = t/dT;
 
             var rStep = _calculateFadeStep(_currentColor.red, colorTo.red, steps);
@@ -382,7 +391,7 @@ var bb8 = module.exports = function bb8(id) {
                     _this.fadeTo({red: 0, green: 0, blue: 0});
                 }
                 fadeToBlack = !fadeToBlack;
-            }, 1000);
+            }, BLINK_INTERVAL);
         }
 
         this.glow = function() {
@@ -414,7 +423,7 @@ var bb8 = module.exports = function bb8(id) {
 
                 Logger.log(r, g, b);
                 _droid.color({ red: r, green: g, blue: b });
-            }, 100);
+            }, FADE_INTERVAL);
         }
     }
 
