@@ -2,86 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
     <title>BB-8</title>
 
-    <script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script>
+    <link rel="stylesheet" href="https://necolas.github.io/normalize.css/4.1.1/normalize.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/stylesheets/style.css" type="text/css" media="screen" />
 
-        var isConnected = false;
+    <!-- BOOTSTRAP START -->
+    <!-- Latest compiled and minified CSS -->
+    <!--link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"-->
+    <!-- BOOTSTRAP END -->
 
-        function connect() {
-            if (isConnected) {
-                return;
-            }
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.9.25/paper-full.min.js"></script>
+    <script type="text/javascript" src="/javascripts/functions.js"></script>
 
-            $.get( "/connect/?id="+ $("#id").val(), function( data ) {
-                isConnected = true;
-            });
-        }
-
-        function disconnect() {
-            if (!isConnected) {
-                return;
-            }
-
-            $.get( "/disconnect/?id="+ $("#id").val(), function( data ) {
-                isConnected = false;
-            });
-        }
-
-        function startCalibration() {
-            if (!isConnected) {
-                return;
-            }
-
-            $.get( "/startCalibration/?id="+ $("#id").val(), function( data ) {
-
-            });
-        }
-
-        function completeCalibration() {
-            if (!isConnected) {
-                return;
-            }
-
-            $.get( "/completeCalibration/?id="+ $("#id").val(), function( data ) {
-
-            });
-        }
-
-        function startNavigation() {
-            if (!isConnected) {
-                return;
-            }
-
-            $.get( "/startNavigation/?id="+ $("#id").val(), function( data ) {
-
-            });
-        }
-
-        function cancelNavigation() {
-            if (!isConnected) {
-                return;
-            }
-
-            $.get( "/cancelNavigation/?id="+ $("#id").val(), function( data ) {
-
-            });
-        }
-    </script>
 </head>
 <body>
 
-<form>
-    <label for="id">BB-8 Bluetooth ID</label>
-    <input type="text" id="id" value="56504b4b3f714fa198d1f9a5f0349dfe" />
-    <button type="button" onclick="connect()">Connect</button>
-    <button type="button" onclick="disconnect()">Disconnect</button>
-    <button type="button" onclick="startCalibration()">Start Calibration</button>
-    <button type="button" onclick="completeCalibration()">Complete Calibration</button>
-    <button type="button" onclick="startNavigation()">Start Navigation</button>
-    <button type="button" onclick="cancelNavigation()">Cancel Navigation</button>
+<form class="center width-33">
+    <fieldset>
+        <label class="top text-left" for="deviceId">Pick BB-8 Bluetooth ID:</label>
+        <select id="deviceId"></select>
+        <button class="right" type="button" onclick="discoverDevices()">Update</button>
+    </fieldset>
+    <fieldset>
+        <label class="top text-left" for="deviceStatus">Status:</label>
+        <input class="block" type="text" id="deviceStatus" value="Disconnected" readonly="readonly" />
+        <button class="right" type="button" onclick="disconnect()">Disconnect</button>
+        <button class="right" type="button" onclick="connect()">Connect</button>
+    </fieldset>
+    <fieldset>
+        <div id="rssi"><div class="bar">&nbsp;</div><div class="value">&nbsp;</div></div>
+        <button class="right" type="button" onclick="completeCalibration()">Complete Calibration</button>
+        <button class="right" type="button" onclick="startCalibration()">Calibrate</button>
+    </fieldset>
+    <fieldset>
+        <canvas id="canvas"></canvas>
+    </fieldset>
+    <fieldset>
+        <button class="right" type="button" onclick="cancelNavigation()">Cancel Navigation</button>
+        <button class="right" type="button" onclick="startNavigation()">Start Navigation</button>
+    </fieldset>
+
 </form>
 
 </body>

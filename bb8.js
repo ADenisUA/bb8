@@ -2,13 +2,14 @@
 
 var sphero = require("sphero");
 
-var bb8 = module.exports = function bb8(id) {
+var bb8 = module.exports = function bb8(device) {
 
-    var _id = id;
+    var _id = (typeof(device) != "String") ? device.uuid : device;
     var _droid = null;
     var _navigator = null;
     var _decorator = null;
     var _this = this;
+    var _device = (typeof(device) == "String") ? null : device;
 
     var _rssiLimit = -40;
     var _rssi = -100;
@@ -16,7 +17,7 @@ var bb8 = module.exports = function bb8(id) {
     var _lastDirection = 0;
     var _txPowerLevel = 0;
     var _direction = "forward";
-    var _isConnected = true;
+    var _isConnected = false;
 
     var _rssiScanInterval = null;
     var _chooseDirectionTimeout = null;
@@ -35,9 +36,13 @@ var bb8 = module.exports = function bb8(id) {
         return _id;
     }
 
+    this.getRssi = function() {
+        return _rssi;
+    }
+
     this.connect = function(callback) {
         if (!_droid) {
-            _droid = sphero(_id);
+            _droid = sphero(_id, {peripheral: _device});
             _navigator = new Navigator(_droid);
             _decorator = new Decorator(_droid);
 
@@ -59,7 +64,7 @@ var bb8 = module.exports = function bb8(id) {
                 _droid.setDefaultSettings();
                 _droid.stopOnDisconnect();
                 _droid.getPowerState(function(error, data) {
-                    Logger.log("Power state", data);
+                    //Logger.log("Power state", data);
                 });
 
                 if (callback) callback();
@@ -67,7 +72,7 @@ var bb8 = module.exports = function bb8(id) {
         }
 
         if (_isConnected) {
-            _this.disconnect(_callback);
+            if (callback) callback();
         } else {
             _callback();
         }
@@ -448,15 +453,14 @@ var bb8 = module.exports = function bb8(id) {
     }
 }
 
-/*
-var droid = new bb8("56504b4b3f714fa198d1f9a5f0349dfe");
-droid.connect(function() {
-    //droid.startCalibration();
-    //setTimeout(function() {
-    //    droid.completeCalibration();
-    //}, 10000);
-    //droid.getPosition();
-    //droid.disconnect();
-    droid.startNavigation();
-});
-    */
+
+//var droid = new bb8("56504b4b3f714fa198d1f9a5f0349dfe");
+//droid.connect(function() {
+//    //droid.startCalibration();
+//    //setTimeout(function() {
+//    //    droid.completeCalibration();
+//    //}, 10000);
+//    //droid.getPosition();
+//    //droid.disconnect();
+//    //droid.startNavigation();
+//});

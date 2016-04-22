@@ -1,8 +1,128 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+/****** COMMON ******/
+
+* {
+    font-size: 16px;
+    font-family: Arial;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: #000;
 }
 
-a {
-  color: #00B7FF;
+html, body {
+    width: 100%;
+    height: 100%;
+    background-color: #EFEFEF;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.expanded {
+    width: 100%;
+}
+
+.block {
+    display: block;
+    width: auto;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.width-33 {
+    width: 33%;
+}
+
+.right {
+    float: right;
+}
+
+
+/****** FORM ******/
+
+form {
+    margin-top: 1em;
+    border: 1px solid #AAA;
+    padding: 0.5em;
+    border-radius: 0.5em;
+    background-color: #CCC;
+}
+
+form fieldset {
+    display: block;
+    border: none;
+    padding: 0.25em 0.5em;
+    margin-bottom: 0.25em;
+}
+
+form button {
+    border-radius: 0.5em;
+    border: 1px solid #000;
+    background-color: #AAA;
+    padding: 0.25em 0.5em;
+    margin: 0.25em 0.5em;
+    margin-right: 0;
+    color: #000;
+    cursor: pointer;
+    display: inline-block;
+}
+
+form label {
+    display: block;
+    color: #555;
+    font-size: 0.9em;
+}
+
+form input[type=text], form select {
+    border: 1px solid #000;
+    background-color: #FFF;
+    padding: 0.25em 0.5em;
+    margin: 0.25em;
+    color: #AAA;
+    display: inline-block;
+    font-size: 0.9em;
+}
+
+form label.top {
+    display: block;
+}
+
+/****** CUSTOM ******/
+
+#deviceStatus[value="Connected"] {
+    color: #0F0;
+}
+#deviceStatus[value="Disconnected"] {
+    color: #F00;
+}
+
+#rssi {
+    padding: 0.25em;
+    margin: 0.1em;
+    display: inline-block;
+    width: 33%;
+    border: 1px solid #000;
+    background-color: #FFF;
+}
+
+#rssi .bar {
+    background-color: #00F;
+    display: inline-block;
+    transition: width 0.5s ease;
+}
+
+#rssi .value {
+    display: inline-block;
+    margin-left: 0.5em;
+}
+
+#canvas {
+    background-color: #FFF;
+    border: 1px solid #555;
+    width: 100%;
+    margin-top: 2em;
 }
