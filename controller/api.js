@@ -4,11 +4,9 @@
 
 var express = require("express");
 var router = express.Router();
-var bb8 = require("../bb8.js");
+var bb8 = require("../libs/bb8/bb8.js");
 var droid = null;
 var noble = require("noble");
-
-
 var peripherals = {};
 
 noble.on('stateChange', function(state) {
@@ -100,7 +98,7 @@ router.get('/getRssi', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        response.json({rssi: droid.getRssi()});
+        response.json({rssi: droid.getRssi(), txPowerLevel: droid.getTxPowerLevel(), rssiLimit: droid.getRssiLimit()});
     } else {
         response.status(404).json({status: "error"});
     }
@@ -119,6 +117,16 @@ router.get('/discoverDevices', function(request, response, next) {
         });
     }
     response.json(devices);
+});
+
+router.get('/getPoints', function(request, response, next) {
+    var deviceId = request.param("deviceId");
+
+    if (droid && droid.getId() == deviceId) {
+        response.json({points: droid.getPoints()});
+    } else {
+        response.status(404).json({status: "error"});
+    }
 });
 
 module.exports = router;

@@ -118,6 +118,7 @@ form label.top {
 #rssi .value {
     display: inline-block;
     margin-left: 0.5em;
+    font-size: 0.75em;
 }
 
 #canvas {

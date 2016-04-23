@@ -18,7 +18,18 @@
 
     <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.9.25/paper-full.min.js"></script>
-    <script type="text/javascript" src="/javascripts/functions.js"></script>
+    <script type="text/javascript" src="/javascripts/utils.js"></script>
+    <script type="text/javascript" src="/javascripts/canvas.js"></script>
+    <script type="text/javascript" src="/javascripts/api.js"></script>
+    <script type="text/javascript" src="/javascripts/application.js"></script>
+
+    <script type="text/javascript">
+        var application = null;
+
+        $(document).ready(function() {
+            application = new Application();
+        });
+    </script>
 
 </head>
 <body>
@@ -27,25 +38,25 @@
     <fieldset>
         <label class="top text-left" for="deviceId">Pick BB-8 Bluetooth ID:</label>
         <select id="deviceId"></select>
-        <button class="right" type="button" onclick="discoverDevices()">Update</button>
+        <button class="right" type="button" onclick="application.discoverDevices()">Update</button>
     </fieldset>
     <fieldset>
         <label class="top text-left" for="deviceStatus">Status:</label>
         <input class="block" type="text" id="deviceStatus" value="Disconnected" readonly="readonly" />
-        <button class="right" type="button" onclick="disconnect()">Disconnect</button>
-        <button class="right" type="button" onclick="connect()">Connect</button>
+        <button class="right" type="button" onclick="application.disconnect()">Disconnect</button>
+        <button class="right" type="button" onclick="application.connect()">Connect</button>
     </fieldset>
     <fieldset>
         <div id="rssi"><div class="bar">&nbsp;</div><div class="value">&nbsp;</div></div>
-        <button class="right" type="button" onclick="completeCalibration()">Complete Calibration</button>
-        <button class="right" type="button" onclick="startCalibration()">Calibrate</button>
+        <button class="right" type="button" onclick="application.completeCalibration()">Complete Calibration</button>
+        <button class="right" type="button" onclick="application.startCalibration()">Calibrate</button>
     </fieldset>
     <fieldset>
         <canvas id="canvas"></canvas>
     </fieldset>
     <fieldset>
-        <button class="right" type="button" onclick="cancelNavigation()">Cancel Navigation</button>
-        <button class="right" type="button" onclick="startNavigation()">Start Navigation</button>
+        <button class="right" type="button" onclick="application.cancelNavigation()">Cancel Navigation</button>
+        <button class="right" type="button" onclick="application.startNavigation()">Start Navigation</button>
     </fieldset>
 
 </form>
