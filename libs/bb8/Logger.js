@@ -11,7 +11,7 @@ Logger.log = function() {
     //arguments.unshift(Logger.getTime());
     //arguments.push(Logger.getTime());
     var _arguments = new Array();
-    _arguments.push(Logger.getTime());
+    _arguments.push(Logger.getTime() + "s : ");
 
     for (var i=0; i<arguments.length; i++) {
         _arguments.push(arguments[i]);

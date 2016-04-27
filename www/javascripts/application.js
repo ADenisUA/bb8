@@ -5,8 +5,8 @@
 function Application() {
 
     var _api = new Api();
-    var _pointsCanvas = new PointsCanvas(document.getElementById('canvas'));
-    var _directionsCanvas = new DirectionCanvas(document.getElementById('canvas'));
+    var _pointsCanvas = new PointsCanvas(document.getElementById('canvas1'));
+    var _directionsCanvas = new DirectionCanvas(document.getElementById('canvas2'));
     var _this = this;
     var _rssiUpdateInterval = null;
     var _pointsUpdateInterval = null;

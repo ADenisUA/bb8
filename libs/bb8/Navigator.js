@@ -19,34 +19,38 @@ var Navigator = module.exports = function Navigator(sphero) {
     var isInited = false;
     var _x = 0;
     var _y = 0;
+    var _integralWay = 0;
+    var _lastSpeed = 0;
 
     this.move = function(range, speed, angle, callback) {
         if (!isInited) {
             _sphero.detectCollisions();
+            _sphero.streamVelocity(_streamSamplesPerSecond);
+            _sphero.streamOdometer(_streamSamplesPerSecond);
+            //_sphero.streamAccelerometer(_streamSamplesPerSecond);
+
             _sphero.on("collision", function(data) {
-                _onCollision(data);
+                _onCollision();
             });
-            //_sphero.streamData();
 
             _sphero.on("velocity", function(data) {
                 _velocity = Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2));
 
-                console.log("velocity", _velocity);
+                if (_velocity < 25) {
+                    console.log("velocity", _velocity);
+                    _onCollision();
+                }
             });
 
             _sphero.on("odometer", function(data) {
                 _x = data.xOdometer.value[0];
                 _y = data.yOdometer.value[0];
-                console.log("odometer", _x, _y);
+                //console.log("odometer", _x, _y);
             });
 
             //_sphero.on("accelerometer", function(data) {
             //    console.log(data);
             //});
-
-            _sphero.streamVelocity(_streamSamplesPerSecond);
-            _sphero.streamOdometer(_streamSamplesPerSecond);
-            //_sphero.streamAccelerometer(_streamSamplesPerSecond);
 
             isInited = true;
         }

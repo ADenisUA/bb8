@@ -27,15 +27,28 @@ var bb8 = module.exports = function bb8(device) {
     var _rssiScanInterval = null;
     var _chooseDirectionTimeout = null;
 
-    var SCAN_RSSI_TIMEOUT = 500;
+    var SCAN_RSSI_TIMEOUT = 750;
     var RSSI_SENSITIVITY = 2;
     var MIN_RANGE = 75;
     var MAX_RANGE = 500;
     var MIN_SPEED = 35;
     var MAX_SPEED = 200;
-    var CHOOSE_DIRECTION_TIMEOUT = 500;
+    var CHOOSE_DIRECTION_TIMEOUT = 1000;
     var RSSI_A = 0.8;
     var MOVE_TIME = 3;//sec
+
+    //states
+    var STATE_NAVIGATING = "STATE_NAVIGATING";
+    var STATE_WAITING = "STATE_WAITING";
+    var STATE_DISCONNECTED = "STATE_DISCONNECTED";
+
+    var _state = STATE_DISCONNECTED;
+
+    //colors
+    var COLOR_CALIBRATING = {red: 255, green: 255, blue: 0};
+    var COLOR_WAITING = {red: 0, green: 0, blue: 0};
+    var COLOR_CALIBRATED = {red: 0, green: 255, blue: 0};
+    var COLOR_ARRIVED = { red: 0, green: 0, blue: 255};
 
     this.getId = function() {
         return _id;
@@ -67,6 +80,7 @@ var bb8 = module.exports = function bb8(device) {
                 _rssi = _sphero.connection.peripheral.rssi;
                 _txPowerLevel = _sphero.connection.peripheral.advertisement.txPowerLevel;
                 _isConnected = true;
+
                 Logger.log("connected", _rssi, _txPowerLevel);
             });
         }
@@ -98,7 +112,7 @@ var bb8 = module.exports = function bb8(device) {
     }
 
     this.startCalibration = function() {
-        _decorator.blink({red: 255, green: 255, blue: 0});
+        _decorator.blink(COLOR_CALIBRATING);
         _startMonitorRssi(function(data) {
             //Logger.log(data);
         });
@@ -107,13 +121,13 @@ var bb8 = module.exports = function bb8(device) {
     this.cancelCalibration = function() {
         _stopMonitorRssi();
         _decorator.stopBlink();
-        _decorator.fadeTo({red: 0, green: 0, blue: 0});
+        _decorator.fadeTo(COLOR_WAITING);
     }
 
     this.completeCalibration = function() {
         _stopMonitorRssi();
         _rssiLimit = _rssi;
-        _decorator.blink({red: 0, green: 255, blue: 0});
+        _decorator.blink(COLOR_CALIBRATED);
     }
 
     this.startNavigation = function() {
@@ -136,7 +150,7 @@ var bb8 = module.exports = function bb8(device) {
     this.cancelNavigation = function() {
         _cancelNavigation();
         _continueNavigation = false;
-        _decorator.fadeTo({red: 0, green: 0, blue: 0}, 1000);
+        _decorator.fadeTo(COLOR_WAITING);
         Logger.log("Stopped!");
     }
 
@@ -179,7 +193,8 @@ var bb8 = module.exports = function bb8(device) {
     var _completeNavigation = function() {
         _continueNavigation = false;
         _cancelNavigation();
-        _decorator.blink({ red: 0, green: 0, blue: 255});
+        _decorator.blink(COLOR_ARRIVED);
+
         Logger.log("Arrived!");
     }
 
@@ -202,7 +217,6 @@ var bb8 = module.exports = function bb8(device) {
         }
 
         var dRssi = _getDrssi(_rssi, _lastRssi);
-        var logMessage = "rssi = " + _rssi + " lastRssi=" + _lastRssi + " dRssi=" + dRssi;
 
         _lastRssi = _rssi;
         var angle = 0;
@@ -269,15 +283,3 @@ var bb8 = module.exports = function bb8(device) {
         return _points;
     }
 }
-
-
-//var droid = new bb8("56504b4b3f714fa198d1f9a5f0349dfe");
-//droid.connect(function() {
-//    //droid.startCalibration();
-//    //setTimeout(function() {
-//    //    droid.completeCalibration();
-//    //}, 10000);
-//    //droid.getPosition();
-//    //droid.disconnect();
-//    //droid.startNavigation();
-//});
