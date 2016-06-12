@@ -50,21 +50,21 @@ function Api() {
         });
     }
 
-    this.startNavigation = function (id, callback) {
-        _this.connect(id, function () {
-            $.get("/startNavigation/?deviceId=" + id, function () {
-                callFunction(callback);
-            });
-        });
-    }
-
-    this.cancelNavigation = function (id, callback) {
+    this.gotToBase = function (id, callback) {
         if (!_isConnected) {
             return;
         }
+        $.get("/gotToBase/?deviceId=" + id, function (points) {
+            callFunction(callback, points);
+        });
+    }
 
-        $.get("/cancelNavigation/?deviceId=" + id, function () {
-            callFunction(callback);
+    this.move = function (id, range, speed, angle, callback) {
+        if (!_isConnected) {
+            return;
+        }
+        $.get("/move/?deviceId=" + id + "&range=" + range + "&speed=" + speed + "&angle=" + angle, function (points) {
+            callFunction(callback, points);
         });
     }
 

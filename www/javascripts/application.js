@@ -9,7 +9,6 @@ function Application() {
     var _directionsCanvas = new DirectionCanvas(document.getElementById('canvas2'));
     var _this = this;
     var _rssiUpdateInterval = null;
-    var _pointsUpdateInterval = null;
 
     this.connect = function() {
         _api.connect($("#deviceId").val(), function(){
@@ -36,10 +35,7 @@ function Application() {
     }
 
     this.startNavigation = function() {
-        _api.startNavigation($("#deviceId").val(), function() {
-            _startUpdateRssi();
-            _startUpdatePoints();
-        });
+        _api.gotToBase($("#deviceId").val(), _onMove);
     }
 
     this.cancelNavigation = function() {
@@ -55,6 +51,22 @@ function Application() {
         });
     }
 
+    this.move = function(angle) {
+        _api.move($("#deviceId").val(), $("#range").val(), $("#speed").val(), angle, _onMove);
+    }
+
+    var _onMove = function(_points) {
+        _api.getRssi($("#deviceId").val(), function (_data) {
+            _updateRssiUi(_data);
+        });
+        console.clear();
+        $.each(_points.points, function(index, point) {
+            console.log(point);
+        });
+        _pointsCanvas.draw(_points);
+        _directionsCanvas.draw(_points);
+    }
+
     var _startUpdateRssi = function() {
         _stopUpdateRssi();
 
@@ -67,21 +79,6 @@ function Application() {
 
     var _stopUpdateRssi = function() {
         stopInterval(_rssiUpdateInterval);
-    }
-
-    var _startUpdatePoints = function() {
-        _stopUpdatePoints();
-
-        _pointsUpdateInterval = setInterval(function () {
-            _api.getPoints($("#deviceId").val(), function (points) {
-                _pointsCanvas.draw(points);
-                _directionsCanvas.draw(points);
-            });
-        }, 1500);
-    }
-
-    var _stopUpdatePoints = function() {
-        stopInterval(_pointsUpdateInterval);
     }
 
     var _updateRssiUi = function (data) {

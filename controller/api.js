@@ -72,29 +72,34 @@ router.get('/completeCalibration', function(request, response, next) {
     }
 });
 
-router.get('/startNavigation', function(request, response, next) {
+router.get('/gotToBase', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.startNavigation();
-        response.json({status: "completed"});
+        droid.gotToBase(function(_points){
+            response.json({points: _points});
+        });
     } else {
         response.status(404).json({status: "error"});
     }
 });
 
-router.get('/cancelNavigation', function(request, response, next) {
+router.get('/move', function(request, response) {
     var deviceId = request.param("deviceId");
+    var range = request.param("range");
+    var speed = request.param("speed");
+    var angle = request.param("angle");
 
     if (droid && droid.getId() == deviceId) {
-        droid.cancelNavigation();
-        response.json({status: "completed"});
+        droid.move(range, speed, angle, function(_points) {
+            response.json({points: _points});
+        });
     } else {
         response.status(404).json({status: "error"});
     }
 });
 
-router.get('/getRssi', function(request, response, next) {
+router.get('/getRssi', function(request, response) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
@@ -104,7 +109,7 @@ router.get('/getRssi', function(request, response, next) {
     }
 });
 
-router.get('/discoverDevices', function(request, response, next) {
+router.get('/discoverDevices', function(request, response) {
     var devices = new Array();
 
     for (var uuid in peripherals) {
@@ -119,7 +124,7 @@ router.get('/discoverDevices', function(request, response, next) {
     response.json(devices);
 });
 
-router.get('/getPoints', function(request, response, next) {
+router.get('/getPoints', function(request, response) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {

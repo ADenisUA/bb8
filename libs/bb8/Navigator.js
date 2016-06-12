@@ -19,10 +19,8 @@ var Navigator = module.exports = function Navigator(sphero) {
     var isInited = false;
     var _x = 0;
     var _y = 0;
-    var _integralWay = 0;
-    var _lastSpeed = 0;
 
-    this.move = function(range, speed, angle, callback) {
+    var _init = function() {
         if (!isInited) {
             _sphero.detectCollisions();
             _sphero.streamVelocity(_streamSamplesPerSecond);
@@ -37,8 +35,8 @@ var Navigator = module.exports = function Navigator(sphero) {
                 _velocity = Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2));
 
                 if (_velocity < 25) {
-                    console.log("velocity", _velocity);
-                    _onCollision();
+                    //console.log("velocity", _velocity);
+                    //_onCollision();
                 }
             });
 
@@ -54,8 +52,15 @@ var Navigator = module.exports = function Navigator(sphero) {
 
             isInited = true;
         }
+    }
 
+    this.move = function(range, speed, angle, callback) {
+        _init();
         _clearTimeout();
+
+        range = parseInt(range);
+        speed = parseInt(speed);
+        angle = parseInt(angle);
 
         var time = Math.round(1000*range/speed);
 
@@ -69,12 +74,9 @@ var Navigator = module.exports = function Navigator(sphero) {
         _point = {
             speed: _speed,
             range: range,
-            heading: _heading,
             absoluteAngle: _absoluteAngle,
             estimatedTime: time,
-            timeStart: (new Date()).getTime(),
-            x: _x,
-            y: _y
+            timeStart: (new Date()).getTime()
         };
 
         _sphero.roll(speed, _heading, function() {
@@ -99,7 +101,10 @@ var Navigator = module.exports = function Navigator(sphero) {
 
     var _onStop = function(callback) {
         _sphero.setHeading(_heading, function() {
-            _point.timeEnd =  (new Date()).getTime();
+            _point.realTime = (new Date()).getTime() - _point.timeStart;
+            _point.x = _x;
+            _point.y = _y;
+
             if (callback) callback(_point);
         });
     }

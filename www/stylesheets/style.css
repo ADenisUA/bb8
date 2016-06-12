@@ -19,6 +19,10 @@ html, body {
     text-align: left;
 }
 
+.text-right {
+    text-align: right;
+}
+
 .expanded {
     width: 100%;
 }
@@ -33,16 +37,27 @@ html, body {
     margin-right: auto;
 }
 
-.width-33 {
-    width: 33%;
-}
-
 .right {
     float: right;
 }
 
+.left {
+    float: left;
+}
+
+/****** LAYOUT ****/
+
+main > * {
+    display: inline-block;
+}
 
 /****** FORM ******/
+
+#formContainer {
+    min-width: 33%;
+    position: absolute;
+    right: 0;
+}
 
 form {
     margin-top: 1em;
@@ -50,6 +65,7 @@ form {
     padding: 0.5em;
     border-radius: 0.5em;
     background-color: #CCC;
+    margin-right: 1em;
 }
 
 form fieldset {
@@ -91,6 +107,12 @@ form label.top {
     display: block;
 }
 
+/****** MAP *********/
+
+#mapsContainer {
+    width: 66%;
+}
+
 /****** CUSTOM ******/
 
 #deviceStatus[value="Connected"] {
@@ -124,6 +146,9 @@ form label.top {
 canvas {
     background-color: #FFF;
     border: 1px solid #555;
-    width: 100%;
     margin-top: 1em;
+    margin-left: 1em;
+    display: inline-block;
+    width: 400px;
+    height: 400px;
 }
