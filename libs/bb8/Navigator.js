@@ -15,36 +15,55 @@ var Navigator = module.exports = function Navigator(sphero) {
     var _point = null;
     var _callback = null;
     var _velocity = 0;
-    var _streamSamplesPerSecond = 1;
+    var _streamSamplesPerSecond = 2;
     var isInited = false;
     var _x = 0;
     var _y = 0;
 
     var _init = function() {
         if (!isInited) {
-            _sphero.detectCollisions();
-            _sphero.streamVelocity(_streamSamplesPerSecond);
-            _sphero.streamOdometer(_streamSamplesPerSecond);
-            //_sphero.streamAccelerometer(_streamSamplesPerSecond);
+            /*
+             xt: 0x20,
+             yt: 0x20,
+             xs: 0x10,
+             ys: 0x10,
+             dead: 0x01
+             */
+            _sphero.detectCollisions({
+                device: "bb8"
+            });
 
             _sphero.on("collision", function(data) {
                 _onCollision();
             });
 
-            _sphero.on("velocity", function(data) {
-                _velocity = Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2));
+            //_sphero.on("velocity", function(data) {
+            //    _velocity = Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2));
+            //
+            //    if (_velocity < 25) {
+            //        //console.log("velocity", _velocity);
+            //        //_onCollision();
+            //    }
+            //});
+            //
+            //_sphero.on("odometer", function(data) {
+            //    _x = data.xOdometer.value[0];
+            //    _y = data.yOdometer.value[0];
+            //    //console.log("odometer", _x, _y);
+            //});
 
-                if (_velocity < 25) {
-                    //console.log("velocity", _velocity);
-                    //_onCollision();
-                }
-            });
+            _sphero.streamVelocity(_streamSamplesPerSecond);
+            _sphero.streamOdometer(_streamSamplesPerSecond);
+            _sphero.streamAccelerometer(_streamSamplesPerSecond);
 
-            _sphero.on("odometer", function(data) {
+            _sphero.on("dataStreaming", function(data) {
                 _x = data.xOdometer.value[0];
                 _y = data.yOdometer.value[0];
-                //console.log("odometer", _x, _y);
+                _velocity = Math.round(Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2)));
+                _acceleration = Math.sqrt(Math.pow(data.xAccel.value[0],2) + Math.pow(data.yAccel.value[0],2) + Math.pow(data.zAccel.value[0],2));
+                Logger.log(_x, _y, _velocity, data.xAccel.value[0], data.yAccel.value[0], data.zAccel.value[0]);
             });
+
 
             //_sphero.on("accelerometer", function(data) {
             //    console.log(data);
