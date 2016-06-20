@@ -16,13 +16,15 @@ var bb8 = module.exports = function bb8(device) {
 
     var _rssiLimit = -40;
     var _rssi = -100;
-    var _lastRssi = -100;
+    var _lastStartRssi = 0;
+
+    var _angle = 0;
     var _lastAngle = 0;
+
     var _txPowerLevel = 0;
     var _direction = "forward";
     var _isConnected = false;
     var _points = new Array();
-    var _continueNavigation = false;
 
     var _rssiScanInterval = null;
 
@@ -78,6 +80,8 @@ var bb8 = module.exports = function bb8(device) {
                 _rssi = _sphero.connection.peripheral.rssi;
                 _txPowerLevel = _sphero.connection.peripheral.advertisement.txPowerLevel;
                 _isConnected = true;
+
+                _sphero.setDefaultSettings();
                 _sphero.stopOnDisconnect();
 
                 Logger.log("connected", _rssi, _txPowerLevel);
@@ -110,24 +114,19 @@ var bb8 = module.exports = function bb8(device) {
         });
     }
 
-    this.startCalibration = function() {
+    this.startCalibration = function(callback) {
         _decorator.blink(COLOR_CALIBRATING);
-        _startMonitorRssi(function(data) {
-            //Logger.log(data);
-        });
+        if (!_isMonitoringRssi()) {
+            _startMonitorRssi();
+            if (callback) callback();
+        }
     }
 
-    this.completeCalibration = function() {
+    this.completeCalibration = function(callback) {
         _stopMonitorRssi();
         _rssiLimit = _rssi;
         _decorator.blink(COLOR_CALIBRATED);
-    }
-
-    this.getPosition = function(callback) {
-        _sphero.readLocator(function(error, data){
-            Logger.log(data);
-            if (callback) callback();
-        });
+        if (callback) callback();
     }
 
     var _startMonitorRssi = function(callback) {
@@ -135,15 +134,14 @@ var bb8 = module.exports = function bb8(device) {
         _rssiScanInterval = setInterval(function(){
             _sphero.connection.peripheral.updateRssi(function(error, rssi){
                 _rssi = (_rssi == 0) ? rssi : _rssi;
-                _lastRssi = (_lastRssi == 0) ? _rssi : _lastRssi;
                 _rssi = Math.round(RSSI_A*_rssi + (1-RSSI_A)*rssi);
 
-                if (callback) callback({rssi: _rssi, lastRssi: _lastRssi, rawRssi: rssi});
+                if (callback) callback({rssi: _rssi, rawRssi: rssi});
             })}, SCAN_RSSI_TIMEOUT);
     }
 
     var _isMonitoringRssi = function() {
-        return _rssiScanInterval == null;
+        return _rssiScanInterval != null;
     }
 
     var _stopMonitorRssi = function() {
@@ -157,33 +155,31 @@ var bb8 = module.exports = function bb8(device) {
         return x - y;
     }
 
-    var _completeNavigation = function() {
-        _continueNavigation = false;
-        _cancelNavigation();
+    var _completeNavigation = function(callback) {
         _decorator.blink(COLOR_ARRIVED);
+
+        if (callback) callback(_navigator.getPoints());
 
         Logger.log("Arrived!");
     }
 
     this.gotToBase = function(callback) {
+
         if (!_isMonitoringRssi()) {
             _startMonitorRssi();
         }
 
+        if (_lastStartRssi == 0) {
+            _lastStartRssi = _rssi;
+        }
+
         if (_rssi >= _rssiLimit) {
-            _completeNavigation();
+            _completeNavigation(callback);
             return;
         }
 
-        var dRssi = _getDrssi(_rssi, _lastRssi);
-
-        _lastRssi = _rssi;
-        var angle = 0;
         var time = MOVE_TIME;
-        //var range = Math.round(Math.abs(_rssi - RSSI_LIMIT)*RSSI_TO_RANGE_RATIO);
         var range = Math.round(Math.pow(_getDrssi(_rssiLimit, _rssi), 2));
-
-        Logger.log(range);
 
         range = (range<MIN_RANGE) ? MIN_RANGE : range;
         range = (range>MAX_RANGE) ? MAX_RANGE : range;
@@ -191,6 +187,23 @@ var bb8 = module.exports = function bb8(device) {
         var speed = Math.round(range/time);
         speed = (speed<MIN_SPEED)?MIN_SPEED:speed;
         speed = (speed>MAX_SPEED)?MAX_SPEED:speed;
+
+        _calculateAngleAndDirection();
+        _updateColor();
+
+        this.move(range, speed, _angle, function(points) {
+            //_decorator.fadeTo(COLOR_WAITING);
+
+            _calculateAngleAndDirection();
+            _updateColor();
+
+            if (callback) callback(points);
+        });
+    }
+
+    var _calculateAngleAndDirection = function() {
+        var dRssi = _getDrssi(_rssi, _lastStartRssi);
+        var angle = 0;
 
         if (dRssi > RSSI_SENSITIVITY) {
             angle = Math.round(45*Math.random()-22.5);
@@ -210,24 +223,24 @@ var bb8 = module.exports = function bb8(device) {
             }
         }
 
-        //Logger.log("_gotoBase: direction="+_direction+" angle="+angle+" "+logMessage);
+        _angle = angle;
 
-        this.move(range, speed, angle, function(points) {
-            _decorator.fadeTo(COLOR_WAITING);
-            _updateColor();
-            if (callback) callback(points);
-        });
+        Logger.log("_calculateAngleAndDirection: _direction=" + _direction + " _angle=" + _angle + " _lastStartRssi=" + _lastStartRssi+" _rssi="+_rssi);
     }
 
 
     this.move = function(range, speed, angle, callback) {
+        _lastStartRssi = _rssi;
+        _lastAngle = angle;
+
         _navigator.move(range, speed, angle, function(point) {
+
+            point.lastRssi = _lastStartRssi;
             point.rssi = _rssi;
-            point.lastRssi = _lastRssi;
             _points.push(point);
+
             if (callback) callback(_points);
         });
-        _lastAngle = angle;
     }
 
     var _updateColor = function() {

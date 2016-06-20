@@ -111,6 +111,7 @@ form label.top {
 
 #mapsContainer {
     width: 66%;
+    position: relative;
 }
 
 /****** CUSTOM ******/
@@ -149,6 +150,11 @@ canvas {
     margin-top: 1em;
     margin-left: 1em;
     display: inline-block;
-    width: 400px;
-    height: 400px;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+#canvas2 {
+
 }

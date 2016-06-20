@@ -34,7 +34,7 @@ router.get('/connect', function(request, response, next) {
     droid = new bb8(peripherals[deviceId]);
 
     droid.connect(function () {
-        response.json({status: "connected"});
+        response.json({rssi: droid.getRssi(), txPowerLevel: droid.getTxPowerLevel(), rssiLimit: droid.getRssiLimit()});
     });
 });
 
@@ -54,8 +54,9 @@ router.get('/startCalibration', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.startCalibration();
-        response.json({status: "started"});
+        droid.startCalibration(function() {
+            response.json({status: "started"});
+        });
     } else {
         response.status(404).json({status: "error"});
     }
@@ -65,8 +66,10 @@ router.get('/completeCalibration', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.completeCalibration();
-        response.json({status: "completed"});
+        droid.completeCalibration(function() {
+            response.json({rssi: droid.getRssi(), txPowerLevel: droid.getTxPowerLevel(), rssiLimit: droid.getRssiLimit()});
+        });
+
     } else {
         response.status(404).json({status: "error"});
     }

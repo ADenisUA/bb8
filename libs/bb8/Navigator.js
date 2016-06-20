@@ -15,6 +15,7 @@ var Navigator = module.exports = function Navigator(sphero) {
     var _point = null;
     var _callback = null;
     var _velocity = 0;
+    var _acceleration = 0;
     var _streamSamplesPerSecond = 2;
     var isInited = false;
     var _x = 0;
@@ -30,7 +31,7 @@ var Navigator = module.exports = function Navigator(sphero) {
              dead: 0x01
              */
             _sphero.detectCollisions({
-                device: "bb8"
+                //device: "bb8"
             });
 
             _sphero.on("collision", function(data) {
@@ -61,7 +62,7 @@ var Navigator = module.exports = function Navigator(sphero) {
                 _y = data.yOdometer.value[0];
                 _velocity = Math.round(Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2)));
                 _acceleration = Math.sqrt(Math.pow(data.xAccel.value[0],2) + Math.pow(data.yAccel.value[0],2) + Math.pow(data.zAccel.value[0],2));
-                Logger.log(_x, _y, _velocity, data.xAccel.value[0], data.yAccel.value[0], data.zAccel.value[0]);
+                //Logger.log(_x, _y, _velocity, data.xAccel.value[0], data.yAccel.value[0], data.zAccel.value[0]);
             });
 
 
@@ -131,8 +132,8 @@ var Navigator = module.exports = function Navigator(sphero) {
     var _onCollision = function() {
         Logger.log("collision!", _velocity);
         _point.isCollision = true;
-        _stop(_callback);
-        _callback = null;
+        //_stop(_callback);
+        //_callback = null;
     }
 
     var _clearTimeout = function() {

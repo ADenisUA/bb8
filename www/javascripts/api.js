@@ -10,15 +10,18 @@ function Api() {
         return _isConnected;
     }
 
+    var _droidData;
+
     this.connect = function (id, callback) {
         if (_isConnected) {
-            callFunction(callback);
+            callFunction(callback, _droidData);
             return;
         }
 
-        $.get("/connect/?deviceId=" + id, function () {
+        $.get("/connect/?deviceId=" + id, function (droidData) {
+            _droidData = droidData;
             _isConnected = true;
-            callFunction(callback);
+            callFunction(callback, droidData);
         });
     }
 
