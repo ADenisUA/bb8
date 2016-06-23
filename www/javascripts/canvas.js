@@ -67,27 +67,36 @@ function DirectionCanvas(canvas) {
 
         _context.clearRect(0, 0, _canvas.width, _canvas.height);
 
+        var i = 0;
+
         $.each(data.points, function(index, point) {
 
             _context.beginPath();
             _context.moveTo(_canvas.width/2, _canvas.height/2);
 
             var dRssi = parseInt(point.rssi) - parseInt(point.lastRssi);
-            var color = "grey";
+
+            var transparency = (i > 10) ? (i / data.points.length) : 1;
+
+            var color = "rgba(128,128,128, " + transparency + ")";
             if (dRssi > 2) {
-                color = "green";
+                color = "rgba(0,255,0, " + transparency + ")";
             } else if (dRssi < 2) {
-                color = "red"
+                color = "rgba(255,0,0, " + transparency + ")";
             }
 
-            point.x = Math.round(parseInt(point.x) * SCALE) - _point.x;
-            point.y = Math.round(parseInt(point.y) * SCALE) - _point.y;
+            //point.x = Math.round(parseInt(point.x) * SCALE) - _point.x;
+            //point.y = Math.round(parseInt(point.y) * SCALE) - _point.y;
+
+            _point.x = parseInt(point.range) * SCALE * Math.cos(parseInt(point.absoluteAngle) * Math.PI / 180);
+            _point.y = parseInt(point.range) * SCALE * Math.sin(parseInt(point.absoluteAngle) * Math.PI / 180);
 
             _context.strokeStyle = color;
-            _context.lineTo(point.x, point.y);
+            //_context.lineTo(point.x, point.y);
+            _context.lineTo(_point.x + _canvas.width/2, _point.y + _canvas.height/2);
             _context.stroke();
 
-            _point = point;
+            //_point = point;
         });
     }
 }

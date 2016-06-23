@@ -32,7 +32,7 @@ var bb8 = module.exports = function bb8(device) {
     var RSSI_SENSITIVITY = 2;
     var MIN_RANGE = 75;
     var MAX_RANGE = 500;
-    var MIN_SPEED = 35;
+    var MIN_SPEED = 50;
     var MAX_SPEED = 200;
     var RSSI_A = 0.8;
     var MOVE_TIME = 3;//sec

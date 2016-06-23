@@ -61,9 +61,9 @@ function Application() {
     var _onGoToBase = function(_points) {
         _onMove(_points);
         if (_isNavigatingToBase) {
-            setTimeout(GOTO_BASE_TIMEOUT, function() {
-                //_goToBase(_onGoToBase);
-            });
+            setTimeout(function() {
+                _goToBase(_onGoToBase);
+            }, GOTO_BASE_TIMEOUT);
         }
     }
 
@@ -76,10 +76,10 @@ function Application() {
         //    _updateRssiUi(_data);
         //});
 
-        console.clear();
-        $.each(_points.points, function(index, point) {
-            console.log(point);
-        });
+        //console.clear();
+        //$.each(_points.points, function(index, point) {
+        //    console.log(point);
+        //});
         _pointsCanvas.draw(_points);
         _directionsCanvas.draw(_points);
 
