@@ -31,11 +31,11 @@ var Navigator = module.exports = function Navigator(sphero) {
              dead: 0x01
              */
             _sphero.detectCollisions({
-                //device: "bb8"
+                device: "bb8"
             });
 
             _sphero.on("collision", function(data) {
-                _onCollision();
+                _onCollision(data);
             });
 
             //_sphero.on("velocity", function(data) {
@@ -96,8 +96,12 @@ var Navigator = module.exports = function Navigator(sphero) {
             range: range,
             absoluteAngle: _absoluteAngle,
             estimatedTime: time,
-            timeStart: (new Date()).getTime()
+            timeStart: (new Date()).getTime(),
+            isCollision: false
         };
+
+        _point.x = _x;
+        _point.y = _y;
 
         _sphero.roll(speed, _heading, function() {
             _timeout = setTimeout(function() {
@@ -129,9 +133,45 @@ var Navigator = module.exports = function Navigator(sphero) {
         });
     }
 
-    var _onCollision = function() {
-        Logger.log("collision!", _velocity);
-        _point.isCollision = true;
+    var COLLISION_MAGNITUDE_SENSITIVITY = 28;
+    var COLLISION_RANGE_SENSITIVITY = 5;
+
+    var _onCollision = function(data) {
+        var magnitude = Math.sqrt(data.xMagnitude*data.yMagnitude);
+        var dX = parseInt(_x) - parseInt(_point.x);
+        var dY = parseInt(_y) - parseInt(_point.y);
+        var range = Math.sqrt(dX*dY);
+
+        if (!_point.isCollision && (magnitude > COLLISION_MAGNITUDE_SENSITIVITY || range < COLLISION_RANGE_SENSITIVITY)) {
+            Logger.log("collision! magnitude="
+                + magnitude
+                + " xmagnitude="
+                +  data.xMagnitude
+                + " ymagnitude="
+                +  data.yMagnitude
+                + " speed="
+                + data.speed
+                + " dx="
+                + dX
+                + " dy="
+                + dY);
+
+            _point.isCollision = true;
+        } else {
+            //Logger.log("not collision magnitude="
+            //    + magnitude
+            //    + " xmagnitude="
+            //    +  data.xMagnitude
+            //    + " ymagnitude="
+            //    +  data.yMagnitude
+            //    + " speed="
+            //    + data.speed
+            //    + " dx="
+            //    + dX
+            //    + " dy="
+            //    + dY);
+        }
+
         //_stop(_callback);
         //_callback = null;
     }

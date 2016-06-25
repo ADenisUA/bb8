@@ -97,6 +97,7 @@ function DirectionCanvas(canvas) {
             _context.stroke();
 
             //_point = point;
+            i++;
         });
     }
 }

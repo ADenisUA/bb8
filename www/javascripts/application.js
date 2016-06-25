@@ -17,6 +17,7 @@ function Application() {
     this.connect = function() {
         _api.connect($("#deviceId").val(), function(droidData){
             _droidData = droidData;
+            _droidData.lastRssi = 0;
             _updateConnectedStatusUi();
         });
     }
@@ -41,11 +42,13 @@ function Application() {
 
     this.startNavigation = function() {
         _isNavigatingToBase = true;
+        //_startUpdateRssi();
         _goToBase(_onGoToBase);
     }
 
     this.cancelNavigation = function() {
         _isNavigatingToBase = false;
+        //_stopUpdateRssi();
     }
 
     this.discoverDevices = function() {
@@ -72,6 +75,7 @@ function Application() {
     }
 
     var _onMove = function(_points) {
+        _droidData.lastRssi = _droidData.rssi;
         //_api.getRssi($("#deviceId").val(), function (_data) {
         //    _updateRssiUi(_data);
         //});
@@ -95,7 +99,7 @@ function Application() {
             _api.getRssi($("#deviceId").val(), function (data) {
                 _updateRssiUi(data);
             });
-        }, 1500);
+        }, 1000);
     }
 
     var _stopUpdateRssi = function() {
@@ -104,7 +108,7 @@ function Application() {
 
     var _updateRssiUi = function (data) {
         $("#rssi .bar").width((100 + data.rssi) + "%");
-        $("#rssi .value").html(data.rssi + "(" + data.rssiLimit + "/" + _droidData.txPowerLevel + ")");
+        $("#rssi .value").html(data.rssi + "(" + data.rssiLimit + "/" + _droidData.lastRssi + ")");
         _droidData.rssiLimit = data.rssiLimit;
         _updateConnectedStatusUi();
     }

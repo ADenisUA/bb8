@@ -17,25 +17,25 @@ var bb8 = module.exports = function bb8(device) {
     var _rssiLimit = -40;
     var _rssi = -100;
     var _lastStartRssi = 0;
-
     var _angle = 0;
     var _lastAngle = 0;
-
     var _txPowerLevel = 0;
     var _direction = "forward";
     var _isConnected = false;
     var _points = new Array();
+    var _lastPoint = null;
 
     var _rssiScanInterval = null;
 
     var SCAN_RSSI_TIMEOUT = 750;
     var RSSI_SENSITIVITY = 2;
-    var MIN_RANGE = 75;
+    var MIN_RANGE = 150;
     var MAX_RANGE = 500;
-    var MIN_SPEED = 50;
+    var MIN_SPEED = 75;
     var MAX_SPEED = 200;
     var RSSI_A = 0.8;
     var MOVE_TIME = 3;//sec
+    var MINIMUM_INTENSITY = 55;
 
     //states
     var STATE_NAVIGATING = "STATE_NAVIGATING";
@@ -181,36 +181,41 @@ var bb8 = module.exports = function bb8(device) {
         var time = MOVE_TIME;
         var range = Math.round(Math.pow(_getDrssi(_rssiLimit, _rssi), 2));
 
-        range = (range<MIN_RANGE) ? MIN_RANGE : range;
-        range = (range>MAX_RANGE) ? MAX_RANGE : range;
+        if (_lastPoint != null && _lastPoint.isCollision) {
+            range = MIN_RANGE;
+        }
+
+        range = Math.max(MIN_RANGE, range);
+        range = Math.min(MAX_RANGE, range);
 
         var speed = Math.round(range/time);
-        speed = (speed<MIN_SPEED)?MIN_SPEED:speed;
-        speed = (speed>MAX_SPEED)?MAX_SPEED:speed;
+        speed = Math.max(MIN_SPEED, speed);
+        speed = Math.min(MAX_SPEED, speed);
 
-        _calculateAngleAndDirection();
+        _calculateAngleAndDirection(_getDrssi(_rssi, _lastStartRssi));
         _updateColor();
+
+        Logger.log("_calculateAngleAndDirection: _direction=" + _direction + " _lastStartRssi=" + _lastStartRssi+" _rssi="+_rssi);
 
         this.move(range, speed, _angle, function(points) {
             //_decorator.fadeTo(COLOR_WAITING);
 
-            _calculateAngleAndDirection();
+            _calculateAngleAndDirection(_getDrssi(_rssi, _lastStartRssi));
             _updateColor();
 
             if (callback) callback(points);
         });
     }
 
-    var _calculateAngleAndDirection = function() {
-        var dRssi = _getDrssi(_rssi, _lastStartRssi);
+    var _calculateAngleAndDirection = function(dRssi) {
         var angle = 0;
 
-        if (dRssi > RSSI_SENSITIVITY) {
-            angle = Math.round(45*Math.random()-22.5);
-            _direction = "forward";
-        } else if (dRssi < -RSSI_SENSITIVITY) {
+        if (dRssi < -RSSI_SENSITIVITY || (_lastPoint != null && _lastPoint.isCollision)) {
             angle = Math.round(180+(90*Math.random()-45));
             _direction = "backward";
+        } else if (dRssi > RSSI_SENSITIVITY) {
+            angle = Math.round(45*Math.random()-22.5);
+            _direction = "forward";
         } else {
             var sign = (dRssi >= 0) ? 1 : -1;
 
@@ -224,8 +229,6 @@ var bb8 = module.exports = function bb8(device) {
         }
 
         _angle = angle;
-
-        Logger.log("_calculateAngleAndDirection: _direction=" + _direction + " _angle=" + _angle + " _lastStartRssi=" + _lastStartRssi+" _rssi="+_rssi);
     }
 
 
@@ -238,6 +241,7 @@ var bb8 = module.exports = function bb8(device) {
             point.lastRssi = _lastStartRssi;
             point.rssi = _rssi;
             _points.push(point);
+            _lastPoint = point;
 
             if (callback) callback(_points);
         });
@@ -245,8 +249,8 @@ var bb8 = module.exports = function bb8(device) {
 
     var _updateColor = function() {
         var fade = true;
-        var minimumIntensity = 55;
-        var intensity = minimumIntensity + Math.round((255 - minimumIntensity) * _rssiLimit / _rssi);
+
+        var intensity = MINIMUM_INTENSITY + Math.round((255 - MINIMUM_INTENSITY) * _rssiLimit / _rssi);
         intensity = (intensity > 255) ? 255 : intensity;
 
         //Logger.log("_updateColor", intensity, _direction);
