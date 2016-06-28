@@ -142,7 +142,7 @@ var Navigator = module.exports = function Navigator(sphero) {
         var dY = parseInt(_y) - parseInt(_point.y);
         var range = Math.sqrt(dX*dY);
 
-        if (!_point.isCollision && (magnitude > COLLISION_MAGNITUDE_SENSITIVITY || range < COLLISION_RANGE_SENSITIVITY)) {
+        if (!_point.isCollision && (magnitude > COLLISION_MAGNITUDE_SENSITIVITY /* || range < COLLISION_RANGE_SENSITIVITY */)) {
             Logger.log("collision! magnitude="
                 + magnitude
                 + " xmagnitude="

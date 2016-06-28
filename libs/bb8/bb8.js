@@ -29,12 +29,12 @@ var bb8 = module.exports = function bb8(device) {
 
     var SCAN_RSSI_TIMEOUT = 750;
     var RSSI_SENSITIVITY = 2;
-    var MIN_RANGE = 150;
-    var MAX_RANGE = 500;
-    var MIN_SPEED = 75;
-    var MAX_SPEED = 200;
+    var MIN_RANGE = 300;
+    var MAX_RANGE = 1000;
+    var MIN_SPEED = 100;
+    var MAX_SPEED = 250;
     var RSSI_A = 0.8;
-    var MOVE_TIME = 3;//sec
+    //var MOVE_TIME = 3;//sec
     var MINIMUM_INTENSITY = 55;
 
     //states
@@ -178,8 +178,7 @@ var bb8 = module.exports = function bb8(device) {
             return;
         }
 
-        var time = MOVE_TIME;
-        var range = Math.round(Math.pow(_getDrssi(_rssiLimit, _rssi), 2));
+        var range = MIN_RANGE + _getDrssi(_rssi, _rssiLimit)/_rssi*(MAX_RANGE - MIN_RANGE);
 
         if (_lastPoint != null && _lastPoint.isCollision) {
             range = MIN_RANGE;
@@ -188,7 +187,7 @@ var bb8 = module.exports = function bb8(device) {
         range = Math.max(MIN_RANGE, range);
         range = Math.min(MAX_RANGE, range);
 
-        var speed = Math.round(range/time);
+        var speed = MIN_SPEED + _getDrssi(_rssi, _rssiLimit)/_rssi*(MAX_SPEED - MIN_SPEED);
         speed = Math.max(MIN_SPEED, speed);
         speed = Math.min(MAX_SPEED, speed);
 
