@@ -18,6 +18,7 @@ function PointsCanvas(canvas) {
         _context.moveTo(dX, dY);
 
         var _point = {x: 0, y: 0};
+        var i = 0;
 
         $.each(data.points, function(index, point) {
 
@@ -50,6 +51,18 @@ function PointsCanvas(canvas) {
                 _context.stroke();
             }
 
+            i++;
+
+            if (i == data.points.length) {
+                _context.beginPath();
+                _context.arc(_point.x, _point.y, 3, 0, 2 * Math.PI, false);
+                //_context.fillStyle = "rgba(0,0,255, 0.5)";
+                //_context.fill();
+                _context.lineWidth = LINE_WIDTH;
+                _context.strokeStyle = 'blue';
+                _context.stroke();
+            }
+
             _context.beginPath();
             _context.moveTo(_point.x, _point.y);
         });
@@ -76,7 +89,7 @@ function DirectionCanvas(canvas) {
 
             var dRssi = parseInt(point.rssi) - parseInt(point.lastRssi);
 
-            var transparency = (i > 10) ? (i / data.points.length) : 1;
+            var transparency = (i < data.points.length - 10) ? 0 : Math.round(100 * ( i - (data.points.length-10)) / 10 )/100;
 
             var color = "rgba(128,128,128, " + transparency + ")";
             if (dRssi > 2) {

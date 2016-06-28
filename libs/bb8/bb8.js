@@ -14,7 +14,7 @@ var bb8 = module.exports = function bb8(device) {
     var _this = this;
     var _device = (typeof(device) == "String") ? null : device;
 
-    var _rssiLimit = -40;
+    var _rssiLimit = -50;
     var _rssi = -100;
     var _lastStartRssi = 0;
     var _angle = 0;
@@ -27,11 +27,11 @@ var bb8 = module.exports = function bb8(device) {
 
     var _rssiScanInterval = null;
 
-    var SCAN_RSSI_TIMEOUT = 750;
+    var SCAN_RSSI_TIMEOUT = 500;
     var RSSI_SENSITIVITY = 2;
-    var MIN_RANGE = 300;
-    var MAX_RANGE = 1000;
-    var MIN_SPEED = 100;
+    var MIN_RANGE = 150;
+    var MAX_RANGE = 750;
+    var MIN_SPEED = 75;
     var MAX_SPEED = 250;
     var RSSI_A = 0.8;
     //var MOVE_TIME = 3;//sec

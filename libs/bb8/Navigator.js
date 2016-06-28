@@ -133,7 +133,7 @@ var Navigator = module.exports = function Navigator(sphero) {
         });
     }
 
-    var COLLISION_MAGNITUDE_SENSITIVITY = 28;
+    var COLLISION_MAGNITUDE_SENSITIVITY = 30;
     var COLLISION_RANGE_SENSITIVITY = 5;
 
     var _onCollision = function(data) {
@@ -157,6 +157,8 @@ var Navigator = module.exports = function Navigator(sphero) {
                 + dY);
 
             _point.isCollision = true;
+
+            _stop(_callback);
         } else {
             //Logger.log("not collision magnitude="
             //    + magnitude
