@@ -109,6 +109,7 @@ function Application() {
     var _updateRssiUi = function (data) {
         $("#rssi .bar").width((100 + data.rssi) + "%");
         $("#rssi .value").html(data.rssi + "(" + data.rssiLimit + "/" + _droidData.lastRssi + ")");
+        $("#powerState").val(data.powerState);
         _droidData.rssiLimit = data.rssiLimit;
         _updateConnectedStatusUi();
     }

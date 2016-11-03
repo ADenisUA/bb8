@@ -106,7 +106,7 @@ router.get('/getRssi', function(request, response) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        response.json({rssi: droid.getRssi(), txPowerLevel: droid.getTxPowerLevel(), rssiLimit: droid.getRssiLimit()});
+        response.json({rssi: droid.getRssi(), txPowerLevel: droid.getTxPowerLevel(), rssiLimit: droid.getRssiLimit(), powerState: droid.getPowerState()});
     } else {
         response.status(404).json({status: "error"});
     }

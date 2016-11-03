@@ -14,9 +14,10 @@ var bb8 = module.exports = function bb8(device) {
     var _this = this;
     var _device = (typeof(device) == "String") ? null : device;
 
-    var _rssiLimit = -50;
+    var _rssiLimit = -45;
     var _rssi = -100;
     var _lastStartRssi = 0;
+    var _powerState = null;
     var _angle = 0;
     var _lastAngle = 0;
     var _txPowerLevel = 0;
@@ -26,8 +27,10 @@ var bb8 = module.exports = function bb8(device) {
     var _lastPoint = null;
 
     var _rssiScanInterval = null;
+    var _powerStateScanInterval = null;
 
     var SCAN_RSSI_TIMEOUT = 500;
+    var SCAN_POWER_STATE_TIMEOUT = 10000;
     var RSSI_SENSITIVITY = 2;
     var MIN_RANGE = 150;
     var MAX_RANGE = 750;
@@ -52,22 +55,26 @@ var bb8 = module.exports = function bb8(device) {
 
     this.getId = function() {
         return _id;
-    }
+    };
 
     this.getRssi = function() {
         return _rssi;
-    }
+    };
 
     this.getRssiLimit = function() {
         return _rssiLimit;
-    }
+    };
 
     this.getTxPowerLevel = function() {
         return _txPowerLevel;
-    }
+    };
 
     this.getSphero = function() {
         return _sphero;
+    };
+
+    this.getPowerState = function() {
+        return _powerState;
     }
 
     this.connect = function(callback) {
@@ -84,6 +91,8 @@ var bb8 = module.exports = function bb8(device) {
                 _sphero.setDefaultSettings();
                 _sphero.stopOnDisconnect();
 
+                _startMonitorPower();
+
                 Logger.log("connected", _rssi, _txPowerLevel);
             });
         }
@@ -92,9 +101,6 @@ var bb8 = module.exports = function bb8(device) {
             _sphero.connect(function() {
                 _sphero.setDefaultSettings();
                 _sphero.stopOnDisconnect();
-                _sphero.getPowerState(function(error, data) {
-                    //Logger.log("Power state", data);
-                });
 
                 if (callback) callback();
             });
@@ -110,6 +116,12 @@ var bb8 = module.exports = function bb8(device) {
     this.disconnect = function(callback) {
         _sphero.disconnect(function() {
             _isConnected = false;
+
+            _completeNavigation();
+            _stopMonitorRssi();
+            _stopMonitorPower();
+
+            _sphero = null;
             if (callback) callback();
         });
     }
@@ -136,8 +148,25 @@ var bb8 = module.exports = function bb8(device) {
                 _rssi = (_rssi == 0) ? rssi : _rssi;
                 _rssi = Math.round(RSSI_A*_rssi + (1-RSSI_A)*rssi);
 
-                if (callback) callback({rssi: _rssi, rawRssi: rssi});
+                if (callback) callback({rssi: _rssi, rawRssi: rssi, powerState: _powerState});
             })}, SCAN_RSSI_TIMEOUT);
+    }
+
+    var _startMonitorPower = function(callback) {
+        _stopMonitorPower();
+
+        _powerStateScanInterval = setInterval(function () {
+            _sphero.getPowerState(function(error, data) {
+                _powerState = data.batteryState;
+            });
+        }, SCAN_POWER_STATE_TIMEOUT)
+    }
+
+    var _stopMonitorPower = function(callback) {
+        if (_powerStateScanInterval != null) {
+            clearInterval(_powerStateScanInterval);
+            _powerStateScanInterval = null;
+        }
     }
 
     var _isMonitoringRssi = function() {
