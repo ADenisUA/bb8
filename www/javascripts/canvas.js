@@ -3,6 +3,7 @@
  */
 
 var LINE_WIDTH = 1;
+var POINTS_HISTORY_LENGTH = 10;
 
 function PointsCanvas(canvas) {
     var _canvas = canvas;
@@ -27,11 +28,14 @@ function PointsCanvas(canvas) {
             }
 
             var dRssi = parseInt(point.rssi) - parseInt(point.lastRssi);
-            var color = "grey";
+
+            var transparency = (i < data.points.length - POINTS_HISTORY_LENGTH) ? 1/POINTS_HISTORY_LENGTH : Math.round(100 * ( i - (data.points.length-POINTS_HISTORY_LENGTH)) / POINTS_HISTORY_LENGTH )/100;
+
+            var color = "rgba(128,128,128, " + transparency + ")";
             if (dRssi > 2) {
-                color = "green";
-            } else if (dRssi < 2) {
-                color = "red"
+                color = "rgba(0,255,0, " + transparency + ")";
+            } else if (dRssi < -2) {
+                color = "rgba(255,0,0, " + transparency + ")";
             }
 
             _point.x = dX + Math.round(parseInt(point.x) * SCALE);
@@ -89,12 +93,12 @@ function DirectionCanvas(canvas) {
 
             var dRssi = parseInt(point.rssi) - parseInt(point.lastRssi);
 
-            var transparency = (i < data.points.length - 10) ? 0 : Math.round(100 * ( i - (data.points.length-10)) / 10 )/100;
+            var transparency = (i < data.points.length - POINTS_HISTORY_LENGTH) ? 0 : Math.round(100 * ( i - (data.points.length-POINTS_HISTORY_LENGTH)) / POINTS_HISTORY_LENGTH )/100;
 
             var color = "rgba(128,128,128, " + transparency + ")";
             if (dRssi > 2) {
                 color = "rgba(0,255,0, " + transparency + ")";
-            } else if (dRssi < 2) {
+            } else if (dRssi < -2) {
                 color = "rgba(255,0,0, " + transparency + ")";
             }
 

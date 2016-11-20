@@ -5,6 +5,7 @@
 function Application() {
 
     var GOTO_BASE_TIMEOUT = 1000;
+    var UPDATE_RSSI_INTERVAL = 1000;
 
     var _api = new Api();
     var _pointsCanvas = new PointsCanvas(document.getElementById('canvas1'));
@@ -99,7 +100,7 @@ function Application() {
             _api.getRssi($("#deviceId").val(), function (data) {
                 _updateRssiUi(data);
             });
-        }, 1000);
+        }, UPDATE_RSSI_INTERVAL);
     }
 
     var _stopUpdateRssi = function() {
@@ -116,6 +117,7 @@ function Application() {
 
     var _updateDevicesSelectUi = function (devices) {
         var select = $("#deviceId");
+        select.empty();
         $.each(devices, function (index, device) {
             select.append($(new Option(device.name, device.uuid)));
         });

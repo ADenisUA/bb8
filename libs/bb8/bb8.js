@@ -77,6 +77,21 @@ var bb8 = module.exports = function bb8(device) {
         return _powerState;
     }
 
+    var _onReady = function(callback) {
+        _rssi = _sphero.connection.peripheral.rssi;
+        _txPowerLevel = _sphero.connection.peripheral.advertisement.txPowerLevel;
+        _isConnected = true;
+
+        _sphero.setDefaultSettings();
+        _sphero.stopOnDisconnect();
+
+        _startMonitorPower();
+
+        Logger.log("connected", _rssi, _txPowerLevel);
+
+        if (callback) callback();
+    };
+
     this.connect = function(callback) {
         if (!_sphero) {
             _sphero = sphero(_id, {peripheral: _device});
@@ -84,46 +99,24 @@ var bb8 = module.exports = function bb8(device) {
             _decorator = new Decorator(_sphero);
 
             _sphero.on("ready", function() {
-                _rssi = _sphero.connection.peripheral.rssi;
-                _txPowerLevel = _sphero.connection.peripheral.advertisement.txPowerLevel;
-                _isConnected = true;
-
-                _sphero.setDefaultSettings();
-                _sphero.stopOnDisconnect();
-
-                _startMonitorPower();
-
-                Logger.log("connected", _rssi, _txPowerLevel);
+                _onReady(callback);
             });
-        }
 
-        var _callback = function() {
             _sphero.connect(function() {
-                _sphero.setDefaultSettings();
-                _sphero.stopOnDisconnect();
-
-                if (callback) callback();
             });
-        }
-
-        if (_isConnected) {
-            if (callback) callback();
-        } else {
-            _callback();
+        } else if (!_isConnected) {
+            _onReady(callback);
         }
     }
 
     this.disconnect = function(callback) {
-        _sphero.disconnect(function() {
-            _isConnected = false;
+        _isConnected = false;
 
-            _completeNavigation();
-            _stopMonitorRssi();
-            _stopMonitorPower();
+        _completeNavigation();
+        _stopMonitorRssi();
+        _stopMonitorPower();
 
-            _sphero = null;
-            if (callback) callback();
-        });
+        if (callback) callback();
     }
 
     this.startCalibration = function(callback) {
@@ -157,7 +150,9 @@ var bb8 = module.exports = function bb8(device) {
 
         _powerStateScanInterval = setInterval(function () {
             _sphero.getPowerState(function(error, data) {
-                _powerState = data.batteryState;
+                if (data) {
+                    _powerState = data.batteryState;
+                }
             });
         }, SCAN_POWER_STATE_TIMEOUT)
     }

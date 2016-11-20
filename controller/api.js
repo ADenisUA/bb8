@@ -19,7 +19,6 @@ noble.on('stateChange', function(state) {
 
 noble.on('discover', function(peripheral) {
     peripherals[peripheral.uuid] = peripheral;
-
 });
 
 router.get('/connect', function(request, response, next) {
