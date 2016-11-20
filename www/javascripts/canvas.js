@@ -3,7 +3,7 @@
  */
 
 var LINE_WIDTH = 1;
-var POINTS_HISTORY_LENGTH = 10;
+var POINTS_HISTORY_LENGTH = 20;
 
 function PointsCanvas(canvas) {
     var _canvas = canvas;
