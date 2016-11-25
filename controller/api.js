@@ -4,12 +4,12 @@
 
 var express = require("express");
 var router = express.Router();
-var bb8 = require("../libs/bb8/bb8.js");
+var Droid = require("../libs/bb8/Droid.js");
 var droid = null;
 var noble = require("noble");
-var peripherals = {};
+var btDevices = {};
 
-noble.on('stateChange', function(state) {
+noble.on("stateChange", function(state) {
     if (state === 'poweredOn') {
         noble.startScanning();
     } else {
@@ -18,7 +18,7 @@ noble.on('stateChange', function(state) {
 });
 
 noble.on('discover', function(peripheral) {
-    peripherals[peripheral.uuid] = peripheral;
+    btDevices[peripheral.uuid] = peripheral;
 });
 
 router.get('/connect', function(request, response, next) {
@@ -26,14 +26,21 @@ router.get('/connect', function(request, response, next) {
 
     var deviceId = request.param("deviceId");
 
-    if (droid && droid.getId() == deviceId) {
+    if (droid != null && droid.getId() != deviceId) {
         droid.disconnect();
+        droid = null;
     }
 
-    droid = new bb8(peripherals[deviceId]);
+    if (droid == null) {
+        droid = new Droid(btDevices[deviceId]);
+    }
 
     droid.connect(function () {
-        response.json({rssi: droid.getRssi(), txPowerLevel: droid.getTxPowerLevel(), rssiLimit: droid.getRssiLimit()});
+        response.json({
+            rssi: droid.getSensors().getRssi(),
+            txPowerLevel: droid.getSensors().getTxPowerLevel(),
+            rssiLimit: droid.getBrain().getRssiLimit()
+        });
     });
 });
 
@@ -53,7 +60,7 @@ router.get('/startCalibration', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.startCalibration(function() {
+        droid.getBrain().startCalibration(function() {
             response.json({status: "started"});
         });
     } else {
@@ -65,8 +72,8 @@ router.get('/completeCalibration', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.completeCalibration(function() {
-            response.json({rssi: droid.getRssi(), txPowerLevel: droid.getTxPowerLevel(), rssiLimit: droid.getRssiLimit()});
+        droid.getBrain().completeCalibration(function() {
+            response.json({rssi: droid.getSensors().getRssi(), txPowerLevel: droid.getSensors().getTxPowerLevel(), rssiLimit: droid.getSensors().getRssiLimit()});
         });
 
     } else {
@@ -74,11 +81,11 @@ router.get('/completeCalibration', function(request, response, next) {
     }
 });
 
-router.get('/gotToBase', function(request, response, next) {
+router.get('/goHome', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.gotToBase(function(_points){
+        droid.getBrain().goHome(function(_points){
             response.json({points: _points});
         });
     } else {
@@ -93,7 +100,7 @@ router.get('/move', function(request, response) {
     var angle = request.param("angle");
 
     if (droid && droid.getId() == deviceId) {
-        droid.move(range, speed, angle, function(_points) {
+        droid.getBrain().move(range, speed, angle, function(_points) {
             response.json({points: _points});
         });
     } else {
@@ -105,7 +112,7 @@ router.get('/getRssi', function(request, response) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        response.json({rssi: droid.getRssi(), txPowerLevel: droid.getTxPowerLevel(), rssiLimit: droid.getRssiLimit(), powerState: droid.getPowerState()});
+        response.json({rssi: droid.getSensors().getRssi(), txPowerLevel: droid.getSensors().getTxPowerLevel(), rssiLimit: droid.getSensors().getRssiLimit(), powerState: droid.getSensors().getPowerState()});
     } else {
         response.status(404).json({status: "error"});
     }
@@ -114,13 +121,13 @@ router.get('/getRssi', function(request, response) {
 router.get('/discoverDevices', function(request, response) {
     var devices = new Array();
 
-    for (var uuid in peripherals) {
-        var peripheral = peripherals[uuid];
+    for (var uuid in btDevices) {
+        var btDevice = btDevices[uuid];
         devices.push({
-            uuid: peripheral.uuid,
-            rssi: peripheral.rssi,
-            name: peripheral.advertisement.localName,
-            txPowerLevel: peripheral.advertisement.txPowerLevel
+            uuid: btDevice.uuid,
+            rssi: btDevice.rssi,
+            name: btDevice.advertisement.localName,
+            txPowerLevel: btDevice.advertisement.txPowerLevel
         });
     }
     response.json(devices);
@@ -130,7 +137,7 @@ router.get('/getPoints', function(request, response) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        response.json({points: droid.getPoints()});
+        response.json({points: droid.getBrain().getPoints()});
     } else {
         response.status(404).json({status: "error"});
     }

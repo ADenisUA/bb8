@@ -4,12 +4,13 @@
 
 var Logger = require("./Logger");
 
-var Decorator = module.exports = function Decorator(droid) {
+var Pigment = module.exports = function Pigment(droid) {
+
+    var _this = this;
     var _droid = droid;
     var _fadeInterval = null;
     var _blinkInterval = null;
     var _currentColor = { red: 0, green: 0, blue: 0 };
-    var _this = this;
 
     var FADE_INTERVAL = 250;
     var BLINK_INTERVAL = 1000;
@@ -21,7 +22,7 @@ var Decorator = module.exports = function Decorator(droid) {
         }
     }
 
-    this.stopBlink = function() {
+    var _stopBlink = function() {
         if (_blinkInterval) {
             clearInterval(_blinkInterval);
             _blinkInterval = null;
@@ -52,15 +53,17 @@ var Decorator = module.exports = function Decorator(droid) {
             _this.fadeTo(colorTo);
         } else {
             _stopFade();
+            _stopBlink();
 
             Logger.log("setColor", colorTo);
             _currentColor = colorTo;
-            _droid.color(colorTo);
+            _droid.getSphero().color(colorTo);
         }
     }
 
     this.fadeTo = function(colorTo, time) {
         _stopFade();
+        _stopBlink();
 
         if (_isSameColor(_currentColor, colorTo)) {
             return;
@@ -83,14 +86,15 @@ var Decorator = module.exports = function Decorator(droid) {
                 _colorTo.green = _incrementColor(gStep, _currentColor.green, colorTo.green);
                 _colorTo.blue = _incrementColor(bStep, _currentColor.blue, colorTo.blue);
                 _currentColor = _colorTo;
-                _droid.color(_colorTo);
+                _droid.getSphero().color(_colorTo);
                 //Logger.log("fadeTo", _currentColor, colorTo, rStep, gStep, bStep);
             }
         }, dT);
     }
 
     this.blink = function(color) {
-        _this.stopBlink();
+        _stopFade();
+        _stopBlink();
 
         var fadeToBlack = false;
 
@@ -106,7 +110,7 @@ var Decorator = module.exports = function Decorator(droid) {
 
     this.glow = function() {
         _stopFade();
-        _this.stopBlink();
+        _stopBlink();
 
         var r = 0;
         var g = 0;
@@ -132,7 +136,7 @@ var Decorator = module.exports = function Decorator(droid) {
             }
 
             Logger.log(r, g, b);
-            _droid.color({ red: r, green: g, blue: b });
+            _droid.getSphero().color({ red: r, green: g, blue: b });
         }, FADE_INTERVAL);
     }
 }

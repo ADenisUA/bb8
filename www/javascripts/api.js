@@ -53,11 +53,11 @@ function Api() {
         });
     }
 
-    this.gotToBase = function (id, callback) {
+    this.goHome = function (id, callback) {
         if (!_isConnected) {
             return;
         }
-        $.get("/gotToBase/?deviceId=" + id, function (points) {
+        $.get("/goHome/?deviceId=" + id, function (points) {
             callFunction(callback, points);
         });
     }

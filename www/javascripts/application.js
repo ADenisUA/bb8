@@ -59,7 +59,7 @@ function Application() {
     }
 
     var _goToBase = function(callback) {
-        _api.gotToBase($("#deviceId").val(), callback);
+        _api.goHome($("#deviceId").val(), callback);
     }
 
     var _onGoToBase = function(_points) {
@@ -88,7 +88,9 @@ function Application() {
         _pointsCanvas.draw(_points);
         _directionsCanvas.draw(_points);
 
-        _droidData.rssi = _points.points.pop().rssi;
+        var point = _points.points.pop();
+        _droidData.rssi = point.rssi;
+        _droidData.powerState = point.powerState;
 
         _updateRssiUi(_droidData);
     }
