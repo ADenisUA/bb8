@@ -107,7 +107,6 @@ var Brain = module.exports = function Brain(droid) {
         _angle = angle;
     };
 
-
     this.move = function(range, speed, angle, callback) {
         _lastStartRssi = _rssi;
         _lastAngle = angle;
@@ -115,7 +114,7 @@ var Brain = module.exports = function Brain(droid) {
         _cerebellum.move(range, speed, angle, function(point) {
             point.lastRssi = _lastStartRssi;
             point.rssi = _rssi;
-            point.powerState = _powerState;
+            point.powerState = _droid.getSensors().getPowerState();
             _points.push(point);
             _lastPoint = point;
 
