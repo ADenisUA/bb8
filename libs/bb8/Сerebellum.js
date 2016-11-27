@@ -15,7 +15,7 @@ var Сerebellum = module.exports = function Сerebellum(droid) {
         _droid.getSensors().getNotifier().addListener(_droid.EVENT.COLLISION, function(point) {
             _droid.getMuscles().stop(function () {
                 if (_callback != null) {
-                    point = _droid.getSensors().getPoint();
+                    //point = _droid.getSensors().getPoint();
 
                     _point.x = point.x;
                     _point.y = point.y;
@@ -39,8 +39,6 @@ var Сerebellum = module.exports = function Сerebellum(droid) {
         var heading = _normalizeAngle(angle);
         _absoluteAngle = _normalizeAngle(_absoluteAngle + heading);
 
-        Logger.log(Logger.getTime() + " move range=" + range + " heading=" + _heading + " speed=" + speed + " time=" + time);
-
         _point = {
             speed: speed,
             range: range,
@@ -54,7 +52,7 @@ var Сerebellum = module.exports = function Сerebellum(droid) {
         _point.startX = point.x;
         _point.startY = point.y;
 
-        _droid.getMuscles().move(range, speed, heading, function() {
+        _droid.getMuscles().move(range, speed, heading, time, function() {
             if (_callback != null) {
                 _callback(_point);
                 _callback = null;

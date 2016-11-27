@@ -8,10 +8,12 @@ var Muscles = module.exports = function Muscles(droid) {
     var _this = this;
     var _heading = 0;
 
-    this.move = function(range, speed, heading, callback) {
+    this.move = function(range, speed, heading, time, callback) {
         _clearTimeout();
-
         _heading = heading;
+
+        Logger.log(Logger.getTime() + " move range=" + range + " heading=" + _heading + " speed=" + speed + " time=" + time);
+
         _droid.getSphero().roll(speed, heading, function() {
             _timeout = setTimeout(function() {
                 _this.stop(callback);

@@ -58,7 +58,6 @@ var Droid = module.exports = function Droid(btDevice) {
 
                 _this.setState(_this.STATE.CONNECTED);
 
-
                 if (callback) callback();
             });
 

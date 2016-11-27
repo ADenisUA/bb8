@@ -64,11 +64,11 @@ function Application() {
 
     var _onGoToBase = function(_points) {
         _onMove(_points);
-        if (_isNavigatingToBase) {
-            setTimeout(function() {
-                _goToBase(_onGoToBase);
-            }, GOTO_BASE_TIMEOUT);
-        }
+        // if (_isNavigatingToBase) {
+        //     setTimeout(function() {
+        //         _goToBase(_onGoToBase);
+        //     }, GOTO_BASE_TIMEOUT);
+        // }
     }
 
     this.move = function(angle) {

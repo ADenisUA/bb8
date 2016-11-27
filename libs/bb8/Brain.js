@@ -15,7 +15,6 @@ var Brain = module.exports = function Brain(droid) {
 
     var _direction = "forward";
     var _points = new Array();
-    var _point = {};
     var _lastPoint = {};
     var _rssi = -100;
 
@@ -24,28 +23,26 @@ var Brain = module.exports = function Brain(droid) {
     var MAX_RANGE = 750;
     var MIN_SPEED = 75;
     var MAX_SPEED = 250;
-    var RSSI_A = 0.8;
     //var MOVE_TIME = 3;//sec
 
     function _init() {
         _droid.getNotifier().addListener(_droid.EVENT.STATE_CHANGED, function(state) {
             switch (state) {
                 case _droid.STATE.CONNECTED:
+                    _droid.getSensors().getNotifier().addListener(_droid.getSensors().EVENT.RSSI_CHANGED, function(rssi) {
+                        _rssi = rssi;
+                    });
 
+                    _droid.getSensors().startMonitorRssi();
                     break;
                 case _droid.STATE.DISCONNECTED:
                     _completeNavigation();
                     break;
             }
         });
-        _droid.getSensors().getNotifier().addListener(_droid.getSensors().EVENT.RSSI_CHANGED, function(rssi) {
-            _rssi = rssi;
-        });
     }
 
     this.goHome = function(callback) {
-
-        _droid.getSensors().startMonitorRssi();
 
         if (_lastStartRssi == 0) {
             _lastStartRssi = _rssi;
@@ -74,7 +71,7 @@ var Brain = module.exports = function Brain(droid) {
 
         Logger.log("_calculateAngleAndDirection: _direction=" + _direction + " _lastStartRssi=" + _lastStartRssi+" _rssi="+_rssi);
 
-        this.move(range, speed, _angle, function(points) {
+        _this.move(range, speed, _angle, function(points) {
 
             _calculateAngleAndDirection(_getDrssi(_rssi, _lastStartRssi));
             _updateColor();
@@ -82,6 +79,26 @@ var Brain = module.exports = function Brain(droid) {
             if (callback) callback(points);
         });
     };
+
+    var _updateColor = function() {
+        var intensity = _rssiLimit / _rssi;
+        intensity = (intensity > 1) ? 1 : intensity;
+
+        //Logger.log("_updateColor", intensity, _direction);
+
+        var color = _droid.getSkin().COLOR.GREEN;
+
+        if (_direction == "forward") {
+            color = _droid.getSkin().COLOR.GREEN;
+        } else if (_direction == "backward") {
+            color = _droid.getSkin().COLOR.RED;
+        } else if (_direction == "left") {
+            color = _droid.getSkin().COLOR.YELLOW;
+        } else if (_direction == "right") {
+            color = _droid.getSkin().COLOR.BLUE;
+        }
+        _droid.getSkin().updateColor(color, intensity);
+    }
 
     var _calculateAngleAndDirection = function(dRssi) {
         var angle = 0;
@@ -124,8 +141,9 @@ var Brain = module.exports = function Brain(droid) {
 
     var _completeNavigation = function(callback) {
         //_decorator.blink(COLOR_ARRIVED);
+        _droid.getSensors().stopMonitorRssi();
 
-        if (callback) callback(_navigator.getPoints());
+        if (callback) callback(_points);
 
         Logger.log("Arrived!");
     };
@@ -134,28 +152,29 @@ var Brain = module.exports = function Brain(droid) {
         return _points;
     };
 
-
     this.startCalibration = function(callback) {
         //_decorator.blink(COLOR_CALIBRATING);
-        if (!_isMonitoringRssi()) {
-            _startMonitorRssi();
-            if (callback) callback();
-        }
+        // if (!_isMonitoringRssi()) {
+        //     _startMonitorRssi();
+        // }
+
+        if (callback) callback();
     };
 
     this.completeCalibration = function(callback) {
-        _stopMonitorRssi();
-        _rssiLimit = _rssi;
+        //_stopMonitorRssi();
+        //_rssiLimit = _rssi;
         //_decorator.blink(COLOR_CALIBRATED);
         if (callback) callback();
     };
 
     var _getDrssi = function(x, y) {
         return x - y;
-    }
-
+    };
 
     this.getRssiLimit = function() {
         return _rssiLimit;
     };
+
+    _init();
 };

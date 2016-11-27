@@ -14,13 +14,14 @@ var Sensors = module.exports = function Sensors(droid) {
 
     var _rssiScanInterval = null;
     var _powerStateScanInterval = null;
-    var _rssi = -100;
-    var _powerState = null;
+    var _rssi = 0;
+    var _powerState = "";
     var _txPowerLevel = 0;
     var _streamSamplesPerSecond = 2;
     var _velocity = 0;
     var _acceleration = 0;
     var _point = {"x": 0, "y": 0};
+    var RSSI_A = 0.8;
 
     this.EVENT = {"COLLISION": "COLLISION", "RSSI_CHANGED": "RSSI_CHANGED", "POWER_CHANGED": "POWER_CHANGED"};
 
@@ -36,7 +37,7 @@ var Sensors = module.exports = function Sensors(droid) {
 
                     Logger.log("connected", _rssi, _txPowerLevel);
 
-                    _startMonitorPower();
+                    //_startMonitorPower();
 
                     /*
                      xt: 0x20,
@@ -80,15 +81,15 @@ var Sensors = module.exports = function Sensors(droid) {
                     //    //console.log("odometer", _x, _y);
                     //});
 
-                    _droid.getSphero().streamVelocity(_streamSamplesPerSecond);
+                    //_droid.getSphero().streamVelocity(_streamSamplesPerSecond);
                     _droid.getSphero().streamOdometer(_streamSamplesPerSecond);
-                    _droid.getSphero().streamAccelerometer(_streamSamplesPerSecond);
+                    //_droid.getSphero().streamAccelerometer(_streamSamplesPerSecond);
 
                     _droid.getSphero().on("dataStreaming", function(data) {
                         _point.x = data.xOdometer.value[0];
                         _point.y = data.yOdometer.value[0];
-                        _velocity = Math.round(Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2)));
-                        _acceleration = Math.sqrt(Math.pow(data.xAccel.value[0],2) + Math.pow(data.yAccel.value[0],2) + Math.pow(data.zAccel.value[0],2));
+                        //_velocity = Math.round(Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2)));
+                        //_acceleration = Math.sqrt(Math.pow(data.xAccel.value[0],2) + Math.pow(data.yAccel.value[0],2) + Math.pow(data.zAccel.value[0],2));
                         //Logger.log(_x, _y, _velocity, data.xAccel.value[0], data.yAccel.value[0], data.zAccel.value[0]);
                     });
 
@@ -119,34 +120,30 @@ var Sensors = module.exports = function Sensors(droid) {
     };
 
     this.stopMonitorRssi = function() {
-        if (_isMonitoringRssi()) {
+        if (_rssiScanInterval != null) {
             clearInterval(_rssiScanInterval);
             _rssiScanInterval = null;
         }
     };
 
-    var _startMonitorPower = function(callback) {
-        _stopMonitorPower();
-
-        _powerStateScanInterval = setInterval(function () {
-            _droid.getSphero().getPowerState(function(error, data) {
-                if (data) {
-                    _powerState = data.batteryState;
-                }
-            });
-        }, SCAN_POWER_STATE_TIMEOUT)
-    };
-
-    var _stopMonitorPower = function(callback) {
-        if (_powerStateScanInterval != null) {
-            clearInterval(_powerStateScanInterval);
-            _powerStateScanInterval = null;
-        }
-    };
-
-    var _isMonitoringRssi = function() {
-        return _rssiScanInterval != null;
-    };
+    // var _startMonitorPower = function(callback) {
+    //     _stopMonitorPower();
+    //
+    //     _powerStateScanInterval = setInterval(function () {
+    //         _droid.getSphero().getPowerState(function(error, data) {
+    //             if (data) {
+    //                 _powerState = data.batteryState;
+    //             }
+    //         });
+    //     }, SCAN_POWER_STATE_TIMEOUT)
+    // };
+    //
+    // var _stopMonitorPower = function(callback) {
+    //     if (_powerStateScanInterval != null) {
+    //         clearInterval(_powerStateScanInterval);
+    //         _powerStateScanInterval = null;
+    //     }
+    // };
 
     this.getTxPowerLevel = function() {
         return _txPowerLevel;
