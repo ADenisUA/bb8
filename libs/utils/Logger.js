@@ -3,10 +3,12 @@
  */
 
 module.exports = Logger = {};
+
 Logger.startTime = (new Date()).getTime();
 Logger.getTime = function() {
     return (new Date()).getTime() - Logger.startTime;
-}
+};
+
 Logger.log = function() {
     //arguments.unshift(Logger.getTime());
     //arguments.push(Logger.getTime());

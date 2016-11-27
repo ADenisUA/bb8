@@ -1,6 +1,6 @@
 "use strict";
 
-var Logger = require("./Logger");
+var Logger = require("./../utils/Logger");
 var Pigment = require("./Pigment");
 
 var Skin = module.exports = function Skin(droid) {

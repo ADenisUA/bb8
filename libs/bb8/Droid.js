@@ -1,12 +1,12 @@
 "use strict";
 
 var sphero = require("sphero");
-var Logger = require("./Logger");
+var Logger = require("./../utils/Logger");
 var Brain = require("./Brain");
 var Skin = require("./Skin");
 var Muscles = require("./Muscles");
 var Sensors = require("./Sensors");
-var Notifier = require("./Notifier");
+var Notifier = require("./../utils/Notifier");
 
 var Droid = module.exports = function Droid(btDevice) {
 

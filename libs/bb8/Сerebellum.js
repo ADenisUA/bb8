@@ -1,7 +1,7 @@
 "use strict";
 
-var Logger = require("./Logger");
-var Notifier = require("./Notifier");
+var Logger = require("./../utils/Logger");
+var Notifier = require("./../utils/Notifier");
 
 var Сerebellum = module.exports = function Сerebellum(droid) {
     var _droid = droid;

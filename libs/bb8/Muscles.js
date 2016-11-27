@@ -1,6 +1,6 @@
 "use strict";
 
-var Logger = require("./Logger");
+var Logger = require("./../utils/Logger");
 
 var Muscles = module.exports = function Muscles(droid) {
     var _droid = droid;

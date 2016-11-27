@@ -1,6 +1,6 @@
 "use strict";
 
-var Logger = require("./Logger");
+var Logger = require("./../utils/Logger");
 var Сerebellum = require("./Сerebellum");
 
 var Brain = module.exports = function Brain(droid) {

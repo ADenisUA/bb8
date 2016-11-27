@@ -2,7 +2,7 @@
  * Created by davdeev on 4/23/16.
  */
 
-var Logger = require("./Logger");
+var Logger = require("./../utils/Logger");
 
 var Pigment = module.exports = function Pigment(droid) {
 

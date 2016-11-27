@@ -1,7 +1,7 @@
 "use strict";
 
-var Logger = require("./Logger");
-var Notifier = require("./Notifier");
+var Logger = require("./../utils/Logger");
+var Notifier = require("./../utils/Notifier");
 
 var Sensors = module.exports = function Sensors(droid) {
     var _droid = droid;
