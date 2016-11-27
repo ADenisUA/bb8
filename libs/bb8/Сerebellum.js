@@ -12,7 +12,7 @@ var Сerebellum = module.exports = function Сerebellum(droid) {
     var _callback = null;
 
     var _init = function() {
-        _droid.getSensors().getNotifier().addListener(_droid.EVENT.COLLISION, function(point) {
+        _droid.getSensors().getNotifier().addListener(_droid.getSensors().EVENT.COLLISION, function(point) {
             _droid.getMuscles().stop(function () {
                 if (_callback != null) {
                     //point = _droid.getSensors().getPoint();
@@ -21,6 +21,7 @@ var Сerebellum = module.exports = function Сerebellum(droid) {
                     _point.y = point.y;
                     _point.isCollision = true;
 
+                    Logger.log("oncollision", _point);
                     _callback(_point);
                     _callback = null;
                 }
@@ -58,6 +59,7 @@ var Сerebellum = module.exports = function Сerebellum(droid) {
                         _point.x = point.x;
                         _point.y = point.y;
 
+                        Logger.log("onmove", _point);
                         _callback(_point);
                         _callback = null;
                     });

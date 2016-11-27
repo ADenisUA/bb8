@@ -8,7 +8,7 @@ var FindSignal = module.exports = function FindSignal(brain) {
     var _droid = null;
     var _cerebellum = null;
 
-    var _rssiLimit = -45;
+    var _rssiLimit = -40;
     var _angle = 0;
     var _lastAngle = 0;
     var _lastStartRssi = 0;
@@ -180,4 +180,6 @@ var FindSignal = module.exports = function FindSignal(brain) {
     };
 
     _init();
-}
+};
+
+FindSignal.NAME = "FindSignal";

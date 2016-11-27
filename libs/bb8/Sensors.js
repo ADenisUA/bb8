@@ -7,20 +7,18 @@ var Sensors = module.exports = function Sensors(droid) {
     var _droid = droid;
     var _this = this;
 
-    var SCAN_POWER_STATE_TIMEOUT = 10000;
     var COLLISION_MAGNITUDE_SENSITIVITY = 30;
     var COLLISION_RANGE_SENSITIVITY = 5;
     var SCAN_RSSI_TIMEOUT = 1000;
 
     var _rssiScanInterval = null;
-    var _powerStateScanInterval = null;
     var _rssi = 0;
     var _powerState = "";
     var _txPowerLevel = 0;
     var _streamSamplesPerSecond = 2;
-    var _velocity = 0;
-    var _acceleration = 0;
-    //var _point = {"x": 0, "y": 0};
+    // var _velocity = 0;
+    // var _acceleration = 0;
+    var _point = {"x": 0, "y": 0};
     var RSSI_A = 0.8;
 
     this.EVENT = {"COLLISION": "COLLISION", "RSSI_CHANGED": "RSSI_CHANGED", "POWER_CHANGED": "POWER_CHANGED", "MOVE": "MOVE"};
@@ -39,6 +37,15 @@ var Sensors = module.exports = function Sensors(droid) {
                     _startMonitorPower();
                     _startMonitorCollisions();
                     _startMonitorOdometer();
+
+                    // var opts = {
+                    //     flags: 0x01,
+                    //     x: 0x0000,
+                    //     y: 0x0000,
+                    //     yawTare: 0x0
+                    // };
+                    //
+                    // _droid.getSphero().configureLocator(opts);
 
                     _notifier.fireEvent(_this.EVENT.RSSI_CHANGED, _rssi);
                     break;
@@ -101,6 +108,20 @@ var Sensors = module.exports = function Sensors(droid) {
     };
 
     var _startMonitorOdometer = function() {
+
+        _droid.getSphero().streamOdometer(_streamSamplesPerSecond);
+
+        _droid.getSphero().on("dataStreaming", function(data) {
+            _point = {"x": data.xOdometer.value[0], "y": data.yOdometer.value[0]};
+            //_notifier.fireEvent(_this.EVENT.MOVE, _point);
+
+            //_velocity = Math.round(Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2)));
+            //_acceleration = Math.sqrt(Math.pow(data.xAccel.value[0],2) + Math.pow(data.yAccel.value[0],2) + Math.pow(data.zAccel.value[0],2));
+            //Logger.log(_x, _y, _velocity, data.xAccel.value[0], data.yAccel.value[0], data.zAccel.value[0]);
+        });
+
+        //_droid.getSphero().streamAccelerometer(_streamSamplesPerSecond);
+
         //_droid.getSphero().on("velocity", function(data) {
         //    _velocity = Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2));
         //
@@ -117,25 +138,13 @@ var Sensors = module.exports = function Sensors(droid) {
         //});
 
         //_droid.getSphero().streamVelocity(_streamSamplesPerSecond);
-        //_droid.getSphero().streamOdometer(_streamSamplesPerSecond);
-        //_droid.getSphero().streamAccelerometer(_streamSamplesPerSecond);
-
-        // _droid.getSphero().on("dataStreaming", function(data) {
-        //     _point = {"x": data.xOdometer.value[0], "y": data.yOdometer.value[0]};
-        //     _notifier.fireEvent(_this.EVENT.MOVE, _point);
-
-            //_velocity = Math.round(Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2)));
-            //_acceleration = Math.sqrt(Math.pow(data.xAccel.value[0],2) + Math.pow(data.yAccel.value[0],2) + Math.pow(data.zAccel.value[0],2));
-            //Logger.log(_x, _y, _velocity, data.xAccel.value[0], data.yAccel.value[0], data.zAccel.value[0]);
-        //});
-
 
         //_droid.getSphero().on("accelerometer", function(data) {
         //    console.log(data);
         //});
     }
 
-    var _startMonitorPower = function(callback) {
+    var _startMonitorPower = function() {
         _droid.getSphero().setPowerNotification(1, function(error, data) {
             _droid.getSphero().getPowerState(function(error, data) {
                 if (data) {
@@ -159,15 +168,17 @@ var Sensors = module.exports = function Sensors(droid) {
     };
 
     this.getPoint = function(callback) {
-        _droid.getSphero().readLocator(function(error, data) {
-            var point = null;
+        // _droid.getSphero().readLocator(function(error, data) {
+        //     var point = null;
+        //
+        //     if (data) {
+        //         point = {"x": data.xpos, "y": data.ypos};
+        //     }
+        //
+        //     if (callback) callback(point);
+        // });
 
-            if (data) {
-                point = {"x": data.xpos, "y": data.ypos};
-            }
-
-            if (callback) callback(point);
-        });
+        if (callback) callback(_point);
     };
 
     this.getNotifier = function () {return _notifier};

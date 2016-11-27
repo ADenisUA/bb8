@@ -79,29 +79,29 @@ var Droid = module.exports = function Droid(btDevice) {
             Logger.log(data);
         });
 
-        _sphero.version(function(err, data) {
-            Logger.log(data);
-        });
-
-        _sphero.getBluetoothInfo(function(err, data) {
-            Logger.log(data);
-        });
-
-        _sphero.getVoltageTripPoints(function(err, data) {
-            Logger.log(data);
-        });
-
-        _sphero.getAutoReconnect(function(err, data) {
-            Logger.log(data);
-        });
-
-        _sphero.runL1Diags(function(err, data) {
-            Logger.log(data);
-        });
-
-        _sphero.runL2Diags(function(err, data) {
-            Logger.log(data);
-        });
+        // _sphero.version(function(err, data) {
+        //     Logger.log(data);
+        // });
+        //
+        // _sphero.getBluetoothInfo(function(err, data) {
+        //     Logger.log(data);
+        // });
+        //
+        // _sphero.getVoltageTripPoints(function(err, data) {
+        //     Logger.log(data);
+        // });
+        //
+        // _sphero.getAutoReconnect(function(err, data) {
+        //     Logger.log(data);
+        // });
+        //
+        // _sphero.runL1Diags(function(err, data) {
+        //     Logger.log(data);
+        // });
+        //
+        // _sphero.runL2Diags(function(err, data) {
+        //     Logger.log(data);
+        // });
     };
 
     this.disconnect = function(callback) {

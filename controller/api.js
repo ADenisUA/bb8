@@ -5,6 +5,7 @@
 var express = require("express");
 var router = express.Router();
 var Droid = require("../libs/bb8/Droid.js");
+var FindSignal = require("../libs/bb8/skills/FindSignal");
 var droid = null;
 var noble = require("noble");
 var btDevices = {};
@@ -39,7 +40,7 @@ router.get('/connect', function(request, response, next) {
         response.json({
             rssi: droid.getSensors().getRssi(),
             txPowerLevel: droid.getSensors().getTxPowerLevel(),
-            rssiLimit: droid.getBrain().getSkills().FIND_SIGNAL.getRssiLimit()
+            rssiLimit: droid.getBrain().getSkill(FindSignal.NAME).getRssiLimit()
         });
     });
 });
@@ -60,7 +61,7 @@ router.get('/startCalibration', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.getBrain().getSkills().FIND_SIGNAL.startCalibration(function() {
+        droid.getBrain().getSkill(FindSignal.NAME).startCalibration(function() {
             response.json({status: "started"});
         });
     } else {
@@ -72,7 +73,7 @@ router.get('/completeCalibration', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.getBrain().getSkills().FIND_SIGNAL.completeCalibration(function() {
+        droid.getBrain().getSkill(FindSignal.NAME).completeCalibration(function() {
             response.json({rssi: droid.getSensors().getRssi(), txPowerLevel: droid.getSensors().getTxPowerLevel(), rssiLimit: droid.getSensors().getRssiLimit()});
         });
 
@@ -85,7 +86,7 @@ router.get('/goHome', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.getBrain().getSkills().FIND_SIGNAL.goHome(function(_points){
+        droid.getBrain().getSkill(FindSignal.NAME).goHome(function(_points){
             response.json({points: _points});
         });
     } else {
@@ -100,7 +101,7 @@ router.get('/move', function(request, response) {
     var angle = request.param("angle");
 
     if (droid && droid.getId() == deviceId) {
-        droid.getBrain().getSkills().FIND_SIGNAL.move(range, speed, angle, function(_points) {
+        droid.getBrain().getSkill(FindSignal.NAME).move(range, speed, angle, function(_points) {
             response.json({points: _points});
         });
     } else {
@@ -112,7 +113,7 @@ router.get('/getRssi', function(request, response) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        response.json({rssi: droid.getSensors().getRssi(), txPowerLevel: droid.getSensors().getTxPowerLevel(), rssiLimit: droid.getSensors().getRssiLimit(), powerState: droid.getSensors().getPowerState()});
+        response.json({rssi: droid.getSensors().getRssi(), txPowerLevel: droid.getSensors().getTxPowerLevel(), rssiLimit: droid.getBrain().getSkill(FindSignal.NAME).getRssiLimit(), powerState: droid.getSensors().getPowerState()});
     } else {
         response.status(404).json({status: "error"});
     }
@@ -137,7 +138,7 @@ router.get('/getPoints', function(request, response) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        response.json({points: droid.getBrain().getSkills().FIND_SIGNAL.getPoints()});
+        response.json({points: droid.getBrain().getSkill(FindSignal.NAME).getPoints()});
     } else {
         response.status(404).json({status: "error"});
     }

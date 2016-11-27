@@ -13,7 +13,7 @@ var Brain = module.exports = function Brain(droid) {
     function _init() {
 
         _cerebellum = new Сerebellum(_droid);
-        _skills = {"FIND_SIGNAL": new FindSignal(_this)};
+        _skills[FindSignal.NAME] = new FindSignal(_this);
 
         _droid.getNotifier().addListener(_droid.EVENT.STATE_CHANGED, function(state) {
             switch (state) {
@@ -35,8 +35,8 @@ var Brain = module.exports = function Brain(droid) {
         return _cerebellum;
     };
 
-    this.getSkills = function() {
-        return _skills;
+    this.getSkill = function(skill) {
+        return _skills[skill];
     };
 
     _init();

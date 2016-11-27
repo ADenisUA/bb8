@@ -20,6 +20,7 @@ function Application() {
             _droidData = droidData;
             _droidData.lastRssi = 0;
             _updateConnectedStatusUi();
+            _startUpdateRssi();
         });
     }
 
@@ -98,11 +99,11 @@ function Application() {
     var _startUpdateRssi = function() {
         _stopUpdateRssi();
 
-        _rssiUpdateInterval = setInterval(function () {
-            _api.getRssi($("#deviceId").val(), function (data) {
-                _updateRssiUi(data);
-            });
-        }, UPDATE_RSSI_INTERVAL);
+        // _rssiUpdateInterval = setInterval(function () {
+        //     _api.getRssi($("#deviceId").val(), function (data) {
+        //         _updateRssiUi(data);
+        //     });
+        // }, UPDATE_RSSI_INTERVAL);
     }
 
     var _stopUpdateRssi = function() {
