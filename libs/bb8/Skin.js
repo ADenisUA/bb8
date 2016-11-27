@@ -46,7 +46,7 @@ var Skin = module.exports = function Skin(droid) {
         } else if (color == _this.COLOR.BLUE) {
             _pigment.setColor({ red: 0, green: 0, blue: intensity }, true);
         }
-    }
+    };
 
     _init();
-}
+};
