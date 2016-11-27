@@ -15,10 +15,12 @@ var Droid = module.exports = function Droid(btDevice) {
     var _id = (typeof(btDevice) != "String") ? btDevice.uuid : btDevice;
 
     this.EVENT = {"STATE_CHANGED": "STATE_CHANGED"};
+
     var _notifier = new Notifier();
     this.getNotifier = function () {return _notifier};
 
     this.STATE = {"DISCONNECTED": "DISCONNECTED", "READY": "READY", "CALIBRATING": "CALIBRATING", "SEARCHING": "SEARCHING", "CONNECTED": "CONNECTED", "CONNECTING": "CONNECTING"};
+
     var _state = this.STATE.DISCONNECTED;
 
     var _sphero = null;
@@ -53,8 +55,7 @@ var Droid = module.exports = function Droid(btDevice) {
 
             _sphero = sphero(_id, {"peripheral": _btDevice});
             _sphero.on("ready", function() {
-                _sphero.setDefaultSettings();
-                _sphero.stopOnDisconnect();
+                _initSphero();
 
                 _this.setState(_this.STATE.CONNECTED);
 
@@ -68,7 +69,40 @@ var Droid = module.exports = function Droid(btDevice) {
         } else if (_state != _this.STATE.DISCONNECTED) {
             if (callback) callback();
         }
-    }
+    };
+
+    var _initSphero = function() {
+        _sphero.setDefaultSettings();
+        _sphero.stopOnDisconnect();
+
+        _sphero.getPermOptionFlags(function(err, data) {
+            Logger.log(data);
+        });
+
+        _sphero.version(function(err, data) {
+            Logger.log(data);
+        });
+
+        _sphero.getBluetoothInfo(function(err, data) {
+            Logger.log(data);
+        });
+
+        _sphero.getVoltageTripPoints(function(err, data) {
+            Logger.log(data);
+        });
+
+        _sphero.getAutoReconnect(function(err, data) {
+            Logger.log(data);
+        });
+
+        _sphero.runL1Diags(function(err, data) {
+            Logger.log(data);
+        });
+
+        _sphero.runL2Diags(function(err, data) {
+            Logger.log(data);
+        });
+    };
 
     this.disconnect = function(callback) {
         _this.setState(_this.STATE.DISCONNECTED);

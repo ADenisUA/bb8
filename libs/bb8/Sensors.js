@@ -20,13 +20,12 @@ var Sensors = module.exports = function Sensors(droid) {
     var _streamSamplesPerSecond = 2;
     var _velocity = 0;
     var _acceleration = 0;
-    var _point = {"x": 0, "y": 0};
+    //var _point = {"x": 0, "y": 0};
     var RSSI_A = 0.8;
 
-    this.EVENT = {"COLLISION": "COLLISION", "RSSI_CHANGED": "RSSI_CHANGED", "POWER_CHANGED": "POWER_CHANGED"};
+    this.EVENT = {"COLLISION": "COLLISION", "RSSI_CHANGED": "RSSI_CHANGED", "POWER_CHANGED": "POWER_CHANGED", "MOVE": "MOVE"};
 
     var _notifier = new Notifier();
-    this.getNotifier = function () {return _notifier};
 
     function _init() {
         _droid.getNotifier().addListener(_droid.EVENT.STATE_CHANGED, function(state) {
@@ -37,66 +36,9 @@ var Sensors = module.exports = function Sensors(droid) {
 
                     Logger.log("connected", _rssi, _txPowerLevel);
 
-                    //_startMonitorPower();
-
-                    /*
-                     xt: 0x20,
-                     yt: 0x20,
-                     xs: 0x10,
-                     ys: 0x10,
-                     dead: 0x01
-                     */
-                    _droid.getSphero().detectCollisions({
-                        device: "bb8"
-                    });
-
-                    _droid.getSphero().on("collision", function(data) {
-                        var magnitude = Math.sqrt(data.xMagnitude*data.yMagnitude);
-
-                        if (magnitude > COLLISION_MAGNITUDE_SENSITIVITY) {
-                            Logger.log("collision! magnitude="
-                                + magnitude
-                                + " xmagnitude="
-                                + data.xMagnitude
-                                + " ymagnitude="
-                                + data.yMagnitude
-                                + " speed="
-                                + data.speed);
-                            _notifier.fireEvent(_this.EVENT.COLLISION, _point);
-                        }
-                    });
-
-                    //_droid.getSphero().on("velocity", function(data) {
-                    //    _velocity = Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2));
-                    //
-                    //    if (_velocity < 25) {
-                    //        //console.log("velocity", _velocity);
-                    //        //_onCollision();
-                    //    }
-                    //});
-                    //
-                    //_droid.getSphero().on("odometer", function(data) {
-                    //    _x = data.xOdometer.value[0];
-                    //    _y = data.yOdometer.value[0];
-                    //    //console.log("odometer", _x, _y);
-                    //});
-
-                    //_droid.getSphero().streamVelocity(_streamSamplesPerSecond);
-                    _droid.getSphero().streamOdometer(_streamSamplesPerSecond);
-                    //_droid.getSphero().streamAccelerometer(_streamSamplesPerSecond);
-
-                    _droid.getSphero().on("dataStreaming", function(data) {
-                        _point.x = data.xOdometer.value[0];
-                        _point.y = data.yOdometer.value[0];
-                        //_velocity = Math.round(Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2)));
-                        //_acceleration = Math.sqrt(Math.pow(data.xAccel.value[0],2) + Math.pow(data.yAccel.value[0],2) + Math.pow(data.zAccel.value[0],2));
-                        //Logger.log(_x, _y, _velocity, data.xAccel.value[0], data.yAccel.value[0], data.zAccel.value[0]);
-                    });
-
-
-                    //_droid.getSphero().on("accelerometer", function(data) {
-                    //    console.log(data);
-                    //});
+                    _startMonitorPower();
+                    _startMonitorCollisions();
+                    _startMonitorOdometer();
 
                     _notifier.fireEvent(_this.EVENT.RSSI_CHANGED, _rssi);
                     break;
@@ -126,24 +68,83 @@ var Sensors = module.exports = function Sensors(droid) {
         }
     };
 
-    // var _startMonitorPower = function(callback) {
-    //     _stopMonitorPower();
-    //
-    //     _powerStateScanInterval = setInterval(function () {
-    //         _droid.getSphero().getPowerState(function(error, data) {
-    //             if (data) {
-    //                 _powerState = data.batteryState;
-    //             }
-    //         });
-    //     }, SCAN_POWER_STATE_TIMEOUT)
-    // };
-    //
-    // var _stopMonitorPower = function(callback) {
-    //     if (_powerStateScanInterval != null) {
-    //         clearInterval(_powerStateScanInterval);
-    //         _powerStateScanInterval = null;
-    //     }
-    // };
+    var _startMonitorCollisions = function() {
+        /*
+         xt: 0x20,
+         yt: 0x20,
+         xs: 0x10,
+         ys: 0x10,
+         dead: 0x01
+         */
+        _droid.getSphero().detectCollisions({
+            device: "bb8"
+        });
+
+        _droid.getSphero().on("collision", function(data) {
+            var magnitude = Math.sqrt(data.xMagnitude*data.yMagnitude);
+            Logger.log("collision! magnitude="
+                + magnitude
+                + " xmagnitude="
+                + data.xMagnitude
+                + " ymagnitude="
+                + data.yMagnitude
+                + " speed="
+                + data.speed);
+
+            if (magnitude > COLLISION_MAGNITUDE_SENSITIVITY) {
+                Logger.log("collision fired");
+                _this.getPoint(function(point) {
+                    _notifier.fireEvent(_this.EVENT.COLLISION, point);
+                });
+            }
+        });
+    };
+
+    var _startMonitorOdometer = function() {
+        //_droid.getSphero().on("velocity", function(data) {
+        //    _velocity = Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2));
+        //
+        //    if (_velocity < 25) {
+        //        //console.log("velocity", _velocity);
+        //        //_onCollision();
+        //    }
+        //});
+        //
+        //_droid.getSphero().on("odometer", function(data) {
+        //    _x = data.xOdometer.value[0];
+        //    _y = data.yOdometer.value[0];
+        //    //console.log("odometer", _x, _y);
+        //});
+
+        //_droid.getSphero().streamVelocity(_streamSamplesPerSecond);
+        //_droid.getSphero().streamOdometer(_streamSamplesPerSecond);
+        //_droid.getSphero().streamAccelerometer(_streamSamplesPerSecond);
+
+        // _droid.getSphero().on("dataStreaming", function(data) {
+        //     _point = {"x": data.xOdometer.value[0], "y": data.yOdometer.value[0]};
+        //     _notifier.fireEvent(_this.EVENT.MOVE, _point);
+
+            //_velocity = Math.round(Math.sqrt(Math.pow(data.xVelocity.value[0],2) + Math.pow(data.yVelocity.value[0],2)));
+            //_acceleration = Math.sqrt(Math.pow(data.xAccel.value[0],2) + Math.pow(data.yAccel.value[0],2) + Math.pow(data.zAccel.value[0],2));
+            //Logger.log(_x, _y, _velocity, data.xAccel.value[0], data.yAccel.value[0], data.zAccel.value[0]);
+        //});
+
+
+        //_droid.getSphero().on("accelerometer", function(data) {
+        //    console.log(data);
+        //});
+    }
+
+    var _startMonitorPower = function(callback) {
+        _droid.getSphero().setPowerNotification(1, function(error, data) {
+            _droid.getSphero().getPowerState(function(error, data) {
+                if (data) {
+                    _powerState = data.batteryState;
+                    _notifier.fireEvent(_this.EVENT.POWER_CHANGED, _powerState);
+                }
+            });
+        });
+    };
 
     this.getTxPowerLevel = function() {
         return _txPowerLevel;
@@ -157,9 +158,19 @@ var Sensors = module.exports = function Sensors(droid) {
         return _powerState;
     };
 
-    this.getPoint = function() {
-        return _point;
-    }
+    this.getPoint = function(callback) {
+        _droid.getSphero().readLocator(function(error, data) {
+            var point = null;
+
+            if (data) {
+                point = {"x": data.xpos, "y": data.ypos};
+            }
+
+            if (callback) callback(point);
+        });
+    };
+
+    this.getNotifier = function () {return _notifier};
 
     _init();
 };

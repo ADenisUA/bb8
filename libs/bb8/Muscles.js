@@ -30,9 +30,10 @@ var Muscles = module.exports = function Muscles(droid) {
     };
 
     var _onStop = function(callback) {
-        _droid.getSphero().setHeading(_heading, function() {
-            if (callback) callback();
-        });
+        // _droid.getSphero().setHeading(_heading, function() {
+        //     if (callback) callback();
+        // });
+        if (callback) callback();
     };
 
     var _clearTimeout = function() {

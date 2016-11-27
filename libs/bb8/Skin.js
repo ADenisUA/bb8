@@ -6,7 +6,7 @@ var Pigment = require("./Pigment");
 var Skin = module.exports = function Skin(droid) {
     var _this = this;
     var _droid = droid;
-    var _pigment = new Pigment(_droid);
+    var _pigment = null;
 
     //colors
     var COLOR_CALIBRATING = {red: 255, green: 255, blue: 0};
@@ -18,6 +18,8 @@ var Skin = module.exports = function Skin(droid) {
     this.COLOR = {"GREEN": "GREEN", "RED": "RED", "BLUE": "BLUE", "YELLOW": "YELLOW"};
 
     function _init() {
+        _pigment = new Pigment(_droid);
+
         _droid.getNotifier().addListener(_droid.EVENT.STATE_CHANGED, function(state) {
             switch (state) {
                 case _droid.STATE.SEARCHING:

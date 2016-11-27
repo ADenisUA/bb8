@@ -39,7 +39,7 @@ router.get('/connect', function(request, response, next) {
         response.json({
             rssi: droid.getSensors().getRssi(),
             txPowerLevel: droid.getSensors().getTxPowerLevel(),
-            rssiLimit: droid.getBrain().getRssiLimit()
+            rssiLimit: droid.getBrain().getSkills().FIND_SIGNAL.getRssiLimit()
         });
     });
 });
@@ -60,7 +60,7 @@ router.get('/startCalibration', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.getBrain().startCalibration(function() {
+        droid.getBrain().getSkills().FIND_SIGNAL.startCalibration(function() {
             response.json({status: "started"});
         });
     } else {
@@ -72,7 +72,7 @@ router.get('/completeCalibration', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.getBrain().completeCalibration(function() {
+        droid.getBrain().getSkills().FIND_SIGNAL.completeCalibration(function() {
             response.json({rssi: droid.getSensors().getRssi(), txPowerLevel: droid.getSensors().getTxPowerLevel(), rssiLimit: droid.getSensors().getRssiLimit()});
         });
 
@@ -85,7 +85,7 @@ router.get('/goHome', function(request, response, next) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        droid.getBrain().goHome(function(_points){
+        droid.getBrain().getSkills().FIND_SIGNAL.goHome(function(_points){
             response.json({points: _points});
         });
     } else {
@@ -100,7 +100,7 @@ router.get('/move', function(request, response) {
     var angle = request.param("angle");
 
     if (droid && droid.getId() == deviceId) {
-        droid.getBrain().move(range, speed, angle, function(_points) {
+        droid.getBrain().getSkills().FIND_SIGNAL.move(range, speed, angle, function(_points) {
             response.json({points: _points});
         });
     } else {
@@ -137,7 +137,7 @@ router.get('/getPoints', function(request, response) {
     var deviceId = request.param("deviceId");
 
     if (droid && droid.getId() == deviceId) {
-        response.json({points: droid.getBrain().getPoints()});
+        response.json({points: droid.getBrain().getSkills().FIND_SIGNAL.getPoints()});
     } else {
         response.status(404).json({status: "error"});
     }

@@ -7,7 +7,7 @@ var Сerebellum = module.exports = function Сerebellum(droid) {
     var _droid = droid;
     var _this = this;
 
-    var _point = {};
+    var _point = {"x": 0, "y": 0, "speed": 0, "range": 0, "absoluteAngle": 0, "estimatedTime": 0, "timeStart": 0, "isCollision": false, "startX": 0, "startY": 0};
     var _absoluteAngle = 0;
     var _callback = null;
 
@@ -48,16 +48,23 @@ var Сerebellum = module.exports = function Сerebellum(droid) {
             isCollision: false
         };
 
-        var point = _droid.getSensors().getPoint();
-        _point.startX = point.x;
-        _point.startY = point.y;
+        _droid.getSensors().getPoint(function (point) {
+            _point.startX = point.x;
+            _point.startY = point.y;
 
-        _droid.getMuscles().move(range, speed, heading, time, function() {
-            if (_callback != null) {
-                _callback(_point);
-                _callback = null;
-            }
+            _droid.getMuscles().move(range, speed, heading, time, function() {
+                if (_callback != null) {
+                    var point = _droid.getSensors().getPoint(function (point) {
+                        _point.x = point.x;
+                        _point.y = point.y;
+
+                        _callback(_point);
+                        _callback = null;
+                    });
+                }
+            });
         });
+
     };
 
     var _normalizeAngle = function(angle) {
