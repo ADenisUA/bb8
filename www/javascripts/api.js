@@ -69,7 +69,16 @@ function Api() {
         $.get("/move/?deviceId=" + id + "&range=" + range + "&speed=" + speed + "&angle=" + angle, function (points) {
             callFunction(callback, points);
         });
-    }
+    };
+
+    this.turn = function (id, angle, callback) {
+        if (!_isConnected) {
+            return;
+        }
+        $.get("/turn/?deviceId=" + id + "&angle=" + angle, function () {
+            callFunction(callback);
+        });
+    };
 
     this.getRssi = function (id, callback) {
         if (!_isConnected) {

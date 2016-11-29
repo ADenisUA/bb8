@@ -4,7 +4,7 @@
 
 function Application() {
 
-    var GOTO_BASE_TIMEOUT = 1000;
+    var GOTO_BASE_TIMEOUT = 2000;
     var UPDATE_RSSI_INTERVAL = 1000;
 
     var _api = new Api();
@@ -65,16 +65,20 @@ function Application() {
 
     var _onGoToBase = function(_points) {
         _onMove(_points);
-        // if (_isNavigatingToBase) {
-        //     setTimeout(function() {
-        //         _goToBase(_onGoToBase);
-        //     }, GOTO_BASE_TIMEOUT);
-        // }
+        if (_isNavigatingToBase) {
+            setTimeout(function() {
+                _goToBase(_onGoToBase);
+            }, GOTO_BASE_TIMEOUT);
+        }
     }
 
     this.move = function(angle) {
         _api.move($("#deviceId").val(), $("#range").val(), $("#speed").val(), angle, _onMove);
-    }
+    };
+
+    this.turn = function(angle) {
+        _api.turn($("#deviceId").val(), angle);
+    };
 
     var _onMove = function(_points) {
         _droidData.lastRssi = _droidData.rssi;

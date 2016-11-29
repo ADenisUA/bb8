@@ -29,6 +29,17 @@ var Сerebellum = module.exports = function Сerebellum(droid) {
         });
     };
 
+    this.turn = function(angle, callback) {
+        angle = parseInt(angle);
+
+        var heading = _normalizeAngle(angle);
+        _absoluteAngle = _normalizeAngle(_absoluteAngle + heading);
+
+        _droid.getMuscles().turn(heading, function () {
+            if (callback != null) callback();
+        });
+    };
+
     this.move = function(range, speed, angle, callback) {
         _callback = callback;
 

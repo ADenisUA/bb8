@@ -21,6 +21,12 @@ var Muscles = module.exports = function Muscles(droid) {
         });
     };
 
+    this.turn = function(heading, callback) {
+        _droid.getSphero().setHeading(heading, function () {
+            if (callback) callback();
+        });
+    };
+
     this.stop = function(callback) {
         _clearTimeout();
 

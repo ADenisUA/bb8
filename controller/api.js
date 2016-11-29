@@ -109,6 +109,19 @@ router.get('/move', function(request, response) {
     }
 });
 
+router.get('/turn', function(request, response) {
+    var deviceId = request.param("deviceId");
+    var angle = request.param("angle");
+
+    if (droid && droid.getId() == deviceId) {
+        droid.getBrain().getСerebellum().turn(angle, function() {
+            response.status(200).json({status: "ok"});
+        });
+    } else {
+        response.status(404).json({status: "error"});
+    }
+});
+
 router.get('/getRssi', function(request, response) {
     var deviceId = request.param("deviceId");
 
